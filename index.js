@@ -345,6 +345,11 @@ app.put('/task/:id', function(req, res, next) {
     var newTaskInfo = req.body.task;
     console.info('Task info being updated : ', newTaskInfo);
 
+    if (typeof newTaskInfo == 'string')
+    {
+        newTaskInfo = JSON.parse(newTaskInfo);
+    }
+
     tasks.updateTask(req.params.id, newTaskInfo,function(err, data) {
         if(err)
         {
