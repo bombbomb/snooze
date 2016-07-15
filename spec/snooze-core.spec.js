@@ -624,4 +624,72 @@ describe('Snooze Test Suite', function() {
 
     });
 
+    describe.only('adding an HTTP POST task', function() {
+
+        this.timeout(8000);
+        var taskId;
+
+        beforeEach(function(done) {
+            setTimeout(done, 3000);
+        });
+
+        it('should add an HTTP POST task to dynamo', function(done) {
+            var date = Date.now();
+            request(snooze)
+                .post('/add')
+                .set(process.env.JWT_HEADER, token)
+                .send({ task :
+                {
+                    ts: date + 500,
+                    url: 'http://httpbin.org/post',
+                    refId: '11111',
+                    clientId: 'abcde',
+                    payload :
+                    {
+                        ts: date + 500,
+                        url: 'https://www.linkedIn.com',
+                        refId: '22222',
+                        clientId: 'abcde'
+                    }
+                }
+                })
+                .expect(200)
+                .end(function(err, res) {
+                    console.info(res.body);
+                    if(err) throw err;
+                    if (!res.body.success)
+                    {
+                        throw new Error ('task not added!!')
+                    }
+                    else
+                    {
+                        taskId = res.body.id;
+                        done();
+                        return true;
+                    }
+                });
+        });
+
+
+        it('should have that HTTP POST task in the database', function(done) {
+            request(snooze)
+                .get('/is/' + taskId)
+                .expect(200)
+                .end(function(err, res) {
+                    console.info(res.body);
+                    if(err) throw err;
+                    if(!res.body.success)
+                    {
+                        throw new Error('Task wasnt retrieved from the database correctly');
+                    }
+                    else
+                    {
+                        done();
+                        return true;
+                    }
+                });
+        });
+
+    });
+
 });
