@@ -2,6 +2,7 @@
 try
 {
     var https       = require('https');
+    var request     = require('request');
     var AWS         = require('aws-sdk');
     var logger      = require('./../util/logger');
     var tasks       = require('./tasks');
@@ -35,7 +36,30 @@ process.on('message', function(task){
 
     try {
 
-        if (task && task.url)
+        if (task && task.url && task.payload)
+        {
+            request.post({
+                url : task.url,
+                body: task.payload
+            }, function(e, res, body) {
+                if (e)
+                {
+                    logger.logError('[CHILD] HTTP Request Error: '+e);
+                    process.send({ result: '[CHILD] HTTP Request Error'+e });
+                    process.exit(tasks.ERROR);
+                }
+                else
+                {
+                    console.log("response : ", res);
+                    console.log("body : ", body);
+                    process.send({ result: body});
+                    process.exit(0);
+                }
+
+            });
+
+        }
+        else if (task && task.url)
         {
             var httpRequest = https.get(task.url, function(res) {
 
