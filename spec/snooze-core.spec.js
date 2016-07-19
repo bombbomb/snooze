@@ -649,7 +649,7 @@ describe('Snooze Test Suite', function() {
         });
 
         beforeEach(function(done) {
-            setTimeout(done, 3000);
+            setTimeout(done, 5000);
         });
 
         it('should add an HTTP POST task to dynamo', function(done) {
