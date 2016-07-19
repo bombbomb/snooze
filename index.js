@@ -21,7 +21,14 @@ var runner          = require('./core/runner');
 var sqsProcessorOptions = {
     tableName: process.env.ENVIRONMENT + '_SnoozeSQSWatcher',
     logger: function(message,payload,type) {
-        logger.log(message,type.toUpperCase(),payload);
+        if (type)
+        {
+            logger.log(message,type.toUpperCase(),payload);
+        }
+        else
+        {
+            logger.log(message, 'Type is undefined', payload);
+        }
     },
     maxNumberOfMessages: 5,
     concurrency: 2,
