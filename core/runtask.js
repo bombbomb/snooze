@@ -38,10 +38,30 @@ process.on('message', function(task){
 
         if (task && task.url && task.payload)
         {
-            request.post({
-                url : task.url,
-                body: task.payload
-            }, function(e, res, body) {
+
+            var options = {
+                method: 'POST',
+                headers: {'Content-Type' : 'application/json'},
+                url: task.url
+            };
+
+            function isJson(request) {
+                try {
+                    var jsonString = JSON.stringify(request);
+                    var jsonData = JSON.parse(jsonString);
+                    options.json = jsonData;
+                } catch (e) {
+                    console.log('OPTIONS : ', options)
+                    logger.logError('[CHILD] HTTP Request Error: '+e);
+                    process.send({ result: '[CHILD] HTTP Request Error'+e });
+                    process.exit(tasks.ERROR);
+                }
+                return true;
+            }
+
+            isJson(task.payload);
+
+            request(options, function(e, res, body) {
                 if (e)
                 {
                     logger.logError('[CHILD] HTTP Request Error: '+e);
@@ -52,7 +72,7 @@ process.on('message', function(task){
                 {
                     console.log("response : ", res);
                     console.log("body : ", body);
-                    process.send({ result: body});
+                    process.send({ result: res});
                     process.exit(0);
                 }
 
