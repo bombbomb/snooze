@@ -60,22 +60,13 @@ function setupTestServerForRequests ()
 {
     var express      = require('express');
     var bodyParser   = require("body-parser");
-    var cookieParser  = require('cookie-parser');
     var app = express();
 
     app.use(bodyParser.urlencoded({ extended: false, limit: '50mb' }));
     app.use(bodyParser.json({limit: '50mb'}));
-    app.use(cookieParser());
-    app.use(function (req, res, next) {
-        res.setHeader('Access-Control-Allow-Origin', '*');
-        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-        res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type,BB-JWT');
-        res.setHeader('Access-Control-Allow-Credentials', true);
-        next();
-    });
 
     app.post('/posttask', function (req, res) {
-        res.status(200).json(req.body);
+        res.status(200).json(req.body).end();
     });
 
     app.listen(3050, function () {
@@ -89,6 +80,7 @@ describe('Snooze Test Suite', function() {
     var editID = '';
 
     before(function(done) {
+        this.timeout(5000);
         setTimeout(done, 1900);
     });
 
@@ -124,13 +116,9 @@ describe('Snooze Test Suite', function() {
                     clientId: '12345'
                 }
                 })
+                .expect(200)
                 .expect(function(res){
                     editID = res.body.id;
-                    if(res.statusCode !== 200)
-                    {
-                        console.error(res.body);
-                        throw new Error('Status is not 200, '+res.statusCode);
-                    }
                     if(!res.body.id)
                     {
                         throw new Error('incorrect ID being returned');
@@ -139,8 +127,7 @@ describe('Snooze Test Suite', function() {
                     {
                         return true;
                     }
-                })
-                .end(done);
+                }).end(done);
         });
 
         it('only accepts valid json', function(done) {
@@ -657,7 +644,7 @@ describe('Snooze Test Suite', function() {
         var taskId;
 
         before(function(done) {
-            setupTestServerForRequests()
+            setupTestServerForRequests();
             done();
         });
 
