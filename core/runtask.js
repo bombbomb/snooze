@@ -51,7 +51,7 @@ process.on('message', function(task){
                     var jsonData = JSON.parse(jsonString);
                     options.json = jsonData;
                 } catch (e) {
-                    console.log('OPTIONS : ', options)
+                    console.log('OPTIONS : ', options);
                     logger.logError('[CHILD] HTTP Request Error: '+e);
                     process.send({ result: '[CHILD] HTTP Request Error'+e });
                     process.exit(tasks.ERROR);

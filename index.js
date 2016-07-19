@@ -27,7 +27,7 @@ var sqsProcessorOptions = {
         }
         else
         {
-            logger.log(message, 'Type is undefined', payload);
+            logger.log(message, 'LOG', payload);
         }
     },
     maxNumberOfMessages: 5,

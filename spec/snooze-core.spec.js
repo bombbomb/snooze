@@ -702,7 +702,7 @@ describe('Snooze Test Suite', function() {
                     }
                     else if(res.body.task.status !== 9)
                     {
-                        throw new Error('Task hasnt run, status is ' + res.body.status);
+                        throw new Error('Task hasnt run, status is ' + res.body.task.status);
                     }
                     else
                     {
