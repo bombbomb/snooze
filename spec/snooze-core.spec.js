@@ -10,6 +10,8 @@ var testEnvVars         = require('../test/test.env.js');
 
 var token = jwt.sign({ foo: 'bar', expires: (Date.now()/1000) + (60 * 60 * 24) }, process.env.JWT_SECRET);
 
+var tasks = require('../core/tasks');
+
 
 
 // Stub Overrides
@@ -54,10 +56,36 @@ var appStubs = {
     }
 };
 
+function setupTestServerForRequests ()
+{
+    var express      = require('express');
+    var bodyParser   = require("body-parser");
+    var cookieParser  = require('cookie-parser');
+    var app = express();
+
+    app.use(bodyParser.urlencoded({ extended: false, limit: '50mb' }));
+    app.use(bodyParser.json({limit: '50mb'}));
+    app.use(cookieParser());
+    app.use(function (req, res, next) {
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+        res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type,BB-JWT');
+        res.setHeader('Access-Control-Allow-Credentials', true);
+        next();
+    });
+
+    app.post('/posttask', function (req, res) {
+        res.status(200).json(req.body);
+    });
+
+    app.listen(3050, function () {
+        console.log('Test app listening on 3050');
+    });
+}
+
 
 
 describe('Snooze Test Suite', function() {
-
     var editID = '';
 
     before(function(done) {
@@ -624,29 +652,34 @@ describe('Snooze Test Suite', function() {
 
     });
 
-    describe.only('adding an HTTP POST task', function() {
-
-        this.timeout(8000);
+    describe('adding an HTTP POST task', function() {
+        this.timeout(15000);
         var taskId;
+
+        before(function(done) {
+            setupTestServerForRequests()
+            done();
+        });
 
         beforeEach(function(done) {
             setTimeout(done, 3000);
         });
 
         it('should add an HTTP POST task to dynamo', function(done) {
-            var date = Date.now();
+            var date = Date.now()/1000;
             request(snooze)
                 .post('/add')
                 .set(process.env.JWT_HEADER, token)
                 .send({ task :
                 {
-                    ts: date + 500,
-                    url: 'http://httpbin.org/post',
+                    ts: date + 1,
+                    url: 'http://127.0.0.1:3050/posttask',
                     refId: '11111',
                     clientId: 'abcde',
+                    status: 0,
                     payload :
                     {
-                        ts: date + 500,
+                        ts: date + 50,
                         url: 'https://www.linkedIn.com',
                         refId: '22222',
                         clientId: 'abcde'
@@ -655,7 +688,6 @@ describe('Snooze Test Suite', function() {
                 })
                 .expect(200)
                 .end(function(err, res) {
-                    console.info(res.body);
                     if(err) throw err;
                     if (!res.body.success)
                     {
@@ -676,11 +708,14 @@ describe('Snooze Test Suite', function() {
                 .get('/is/' + taskId)
                 .expect(200)
                 .end(function(err, res) {
-                    console.info(res.body);
                     if(err) throw err;
                     if(!res.body.success)
                     {
-                        throw new Error('Task wasnt retrieved from the database correctly');
+                        throw new Error('Task wasn\'t retrieved from the database correctly');
+                    }
+                    else if(res.body.task.status !== 9)
+                    {
+                        throw new Error('Task hasnt run, status is ' + res.body.status);
                     }
                     else
                     {
@@ -689,6 +724,16 @@ describe('Snooze Test Suite', function() {
                     }
                 });
         });
+
+        it('Task Update Spy', function (done) {
+            tasks.getTask(taskId, function(err, res) {
+                assert.equal(res.result.statusCode, 200);
+                assert.equal(res.result.body.url, 'https://www.linkedIn.com');
+                assert.equal(res.result.body.refId, '22222');
+                assert.equal(res.result.body.clientId, 'abcde');
+                done();
+            })
+        })
 
     });
 
