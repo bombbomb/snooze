@@ -52,29 +52,32 @@ process.on('message', function(task){
                     options.json = jsonData;
                 } catch (e) {
                     logger.logError('[CHILD] HTTP Request Error: '+e);
-                    process.send({ result: '[CHILD] HTTP Request Error'+e });
-                    process.exit(tasks.ERROR);
+                    return false;
                 }
                 return true;
             }
 
-            isJson(task.payload);
-
-            request(options, function(e, res, body) {
-                if (e)
-                {
-                    logger.logError('[CHILD] HTTP Request Error: '+e);
-                    process.send({ result: '[CHILD] HTTP Request Error'+e });
-                    process.exit(tasks.ERROR);
-                }
-                else
-                {
-                    process.send({ result: res});
-                    process.exit(0);
-                }
-
-            });
-
+            if(isJson(task.payload))
+            {
+                request(options, function(e, res, body) {
+                    if (e)
+                    {
+                        logger.logError('[CHILD] HTTP Request Error: '+e);
+                        process.send({ result: '[CHILD] HTTP Request Error'+e });
+                        process.exit(tasks.ERROR);
+                    }
+                    else
+                    {
+                        process.send({ result: res});
+                        process.exit(0);
+                    }
+                });
+            }
+            else
+            {
+                process.send({ result: '[CHILD] HTTP Request Error'+e });
+                process.exit(tasks.ERROR);
+            }
         }
         else if (task && task.url)
         {
