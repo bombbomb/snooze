@@ -660,7 +660,7 @@ describe('Snooze Test Suite', function() {
                 .send({ task :
                 {
                     ts: date + 1,
-                    url: 'http://127.0.0.1:3050/posttask',
+                    url: 'http://dev.snooze.bombbomb.com/posttask',
                     refId: '11111',
                     clientId: 'abcde',
                     status: 0,
