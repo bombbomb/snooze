@@ -2,6 +2,7 @@
 try
 {
     var https       = require('https');
+    var request     = require('request');
     var AWS         = require('aws-sdk');
     var logger      = require('./../util/logger');
     var tasks       = require('./tasks');
@@ -35,7 +36,47 @@ process.on('message', function(task){
 
     try {
 
-        if (task && task.url)
+        if (task && task.url && task.payload)
+        {
+
+            var options = {
+                method: 'POST',
+                headers: {'Content-Type' : 'application/json'},
+                url: task.url
+            };
+
+            function isJson(request) {
+                try {
+                    var jsonString = JSON.stringify(request);
+                    var jsonData = JSON.parse(jsonString);
+                    options.json = jsonData;
+                } catch (e) {
+                    logger.logError('[CHILD] HTTP Request Error: '+e);
+                    process.send({ result: '[CHILD] HTTP Request Error'+e });
+                    process.exit(tasks.ERROR);
+                }
+                return true;
+            }
+
+            isJson(task.payload);
+
+            request(options, function(e, res, body) {
+                if (e)
+                {
+                    logger.logError('[CHILD] HTTP Request Error: '+e);
+                    process.send({ result: '[CHILD] HTTP Request Error'+e });
+                    process.exit(tasks.ERROR);
+                }
+                else
+                {
+                    process.send({ result: res});
+                    process.exit(0);
+                }
+
+            });
+
+        }
+        else if (task && task.url)
         {
             var httpRequest = https.get(task.url, function(res) {
 
