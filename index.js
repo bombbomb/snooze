@@ -20,7 +20,16 @@ var runner          = require('./core/runner');
 
 var sqsProcessorOptions = {
     tableName: process.env.ENVIRONMENT + '_SnoozeSQSWatcher',
-    logger: function(message,payload,type) { logger.log(message,type.toUpperCase(),payload); },
+    logger: function(message,payload,type) {
+        if (type)
+        {
+            logger.log(message,type.toUpperCase(),payload);
+        }
+        else
+        {
+            logger.log(message, 'LOG', payload);
+        }
+    },
     maxNumberOfMessages: 5,
     concurrency: 2,
     useLegacyDynamo: process.env.TEST_RUNNER
@@ -172,6 +181,7 @@ app.post('/add', function (req, res, next) {
         else
         {
             returnError(res, 'no task specified, or not a valid object?!');
+            return;
         }
 
     });
@@ -345,6 +355,11 @@ app.put('/task/:id', function(req, res, next) {
     var newTaskInfo = req.body.task;
     console.info('Task info being updated : ', newTaskInfo);
 
+    if (typeof newTaskInfo == 'string')
+    {
+        newTaskInfo = JSON.parse(newTaskInfo);
+    }
+
     tasks.updateTask(req.params.id, newTaskInfo,function(err, data) {
         if(err)
         {
@@ -379,19 +394,19 @@ function authenticate(req, res, callback)
 
 function returnError(res,err)
 {
-    res.status(500).end('crap '+err);
+    res.status(500).send('crap '+err).end();
 }
 
 function returnErrorJson(res,message,data)
 {
     data = data || null;
-    res.status(500).json({message : message, data:data, success: false});
+    res.status(500).json({message : message, data:data, success: false}).end();
 }
 
 function returnNotFound(res, message, data)
 {
     data = data || null;
-    res.status(404).json({ message : message, data : data, success : false})
+    res.status(404).json({ message : message, data : data, success : false}).end();
 }
 
 function returnSuccess(res,msg)
@@ -401,7 +416,7 @@ function returnSuccess(res,msg)
 
 function returnSuccessJson(res,result)
 {
-    res.status(200).json(result);
+    res.status(200).json(result).end();
 }
 
 /* start task runner process */
