@@ -450,40 +450,69 @@ sqsWatcher.start(function(err, queueData, event, onComplete){
     {
         var sqsBody = JSON.parse(event.message.Body);
         var sqsMessage = JSON.parse(sqsBody.Message);
-        if (event.name.indexOf('ReminderCancellations') != -1 && sqsMessage.itemType == "open")
+        if (event.name.indexOf('ReminderCancellations') != -1)
         {
-            var reminderTaskId = 'rem'+sqsMessage.id.split(':')[1];
-            logger.logInfo('Fetching Reminder Task by RefId to Cancel '+reminderTaskId);
-            tasks.getTaskByRef(reminderTaskId,function(err,task){
-                if (!err && task.Count > 0)
+            var eventMapDetail = null;
+            if (typeof queueData.eventMap != 'undefined') {
+                for (var map in queueData.eventMap)
                 {
-                    var taskDetail = task.Items[0];
-                    if (taskDetail)
+                    if (!queueData.eventMap.hasOwnProperty(map)) continue;
+                    eventMapDetail = queueData.eventMap[map];
+                    if (sqsMessage[eventMapDetail.eventField] == eventMapDetail.eventValue)
                     {
-                        tasks.setStatus(taskDetail.id, tasks.SUCCESS, function(err, data){
-                            err && logger.logError('Failed to cancel Reminder for Opened Email: '+taskDetail.id,taskDetail);
-                            !err && logger.logInfo('Canceled Reminder for Opened Email: '+taskDetail.id,taskDetail);
-                            onComplete(err,null);
-                        });
-                        return;
+                        break;
                     }
-                    logger.logInfo('Fetching Reminder Task by RefId to Cancel '+reminderTaskId,taskDetail);
-                    onComplete('No Task detail, unable to update status for '+taskDetail.id, null);
                 }
-                else
-                {
-                    if (err)
+            }
+            if (eventMapDetail !== null)
+            {
+                if (sqsMessage.event != 'undefined') {
+                    sqsMessage = sqsMessage.event;
+                }
+                var reminderTaskId = sqsMessage[eventMapDetail.idField];
+                if(reminderTaskId.indexOf(':') != -1) {
+                    reminderTaskId = reminderTaskId.split(':')[1];
+                }
+                reminderTaskId = 'rem'+reminderTaskId;
+                logger.logInfo('Fetching Reminder Task by RefId to Cancel '+reminderTaskId);
+
+                tasks.getTaskByRef(reminderTaskId,function(err,task){
+                    if (!err && task.Count > 0)
                     {
-                        logger.logError('sqsProcessor failed to fetch task '+reminderTaskId+': '+err);
+                        var taskDetail = task.Items[0];
+                        if (taskDetail)
+                        {
+                            tasks.setStatus(taskDetail.id, tasks.SUCCESS, function(err, data){
+                                err && logger.logError('Failed to cancel Reminder for Opened Email: '+taskDetail.id,taskDetail);
+                                !err && logger.logInfo('Canceled Reminder for Opened Email: '+taskDetail.id,taskDetail);
+                                onComplete(err,null);
+                            });
+                            return;
+                        }
+                        logger.logInfo('Fetching Reminder Task by RefId to Cancel '+reminderTaskId,taskDetail);
+                        onComplete('No Task detail, unable to update status for '+taskDetail.id, null);
                     }
                     else
                     {
-                        logger.logInfo('No task to update for '+reminderTaskId);
-                        err = null;
+                        if (err)
+                        {
+                            logger.logError('sqsProcessor failed to fetch task '+reminderTaskId+': '+err);
+                        }
+                        else
+                        {
+                            logger.logInfo('No task to update for '+reminderTaskId);
+                            err = null;
+                        }
+                        onComplete(err, null);
                     }
-                    onComplete(err, null);
-                }
-            });
+                });
+            }
+            else
+            {
+                logger.logError('Unable to find event map for event', sqsMessage);
+                onComplete('Unable to find event map for event');
+            }
+
         }
         else
         {
