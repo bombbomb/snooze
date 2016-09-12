@@ -30,8 +30,8 @@ var sqsProcessorOptions = {
             logger.log(message, 'LOG', payload);
         }
     },
-    maxNumberOfMessages: 5,
-    concurrency: 2,
+    maxNumberOfMessages: process.env.MAX_SQS_MESSAGE,
+    concurrency: process.env.SQS_WATCHERS,
     useLegacyDynamo: process.env.TEST_RUNNER
 };
 
