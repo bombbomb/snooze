@@ -469,46 +469,58 @@ sqsWatcher.start(function(err, queueData, event, onComplete){
                 }
                 if (eventMapDetail !== null)
                 {
-                    if (typeof sqsMessage.event != 'undefined') {
+                    if (typeof sqsMessage.event != 'undefined')
+                    {
                         sqsMessage = sqsMessage.event;
                     }
                     var reminderTaskId = sqsMessage[eventMapDetail.idField];
-                    if(reminderTaskId.indexOf(':') != -1) {
+
+                    if (typeof reminderTaskId != 'undefined' && reminderTaskId.indexOf(':') != -1)
+                    {
                         reminderTaskId = reminderTaskId.split(':')[1];
                     }
-                    reminderTaskId = 'rem'+reminderTaskId;
-                    logger.logInfo('Fetching Reminder Task by RefId to Cancel '+reminderTaskId);
 
-                    tasks.getTaskByRef(reminderTaskId,function(err,task){
-                        if (!err && task.Count > 0)
-                        {
-                            var taskDetail = task.Items[0];
-                            if (taskDetail)
+                    if (typeof reminderTaskId != 'undefined' && reminderTaskId.length)
+                    {
+                        reminderTaskId = 'rem'+reminderTaskId;
+                        logger.logInfo('Fetching Reminder Task by RefId to Cancel '+reminderTaskId);
+                        tasks.getTaskByRef(reminderTaskId,function(err,task){
+                            if (!err && task.Count > 0)
                             {
-                                tasks.setStatus(taskDetail.id, tasks.SUCCESS, function(err, data){
-                                    err && logger.logError('Failed to cancel Reminder for Opened Email: '+taskDetail.id,taskDetail);
-                                    !err && logger.logInfo('Canceled Reminder for Opened Email: '+taskDetail.id,taskDetail);
-                                    onComplete(err,null);
-                                });
-                                return;
-                            }
-                            logger.logInfo('Fetching Reminder Task by RefId to Cancel '+reminderTaskId,taskDetail);
-                            onComplete('No Task detail, unable to update status for '+ reminderTaskId, null);
-                        }
-                        else
-                        {
-                            if (err)
-                            {
-                                logger.logError('sqsProcessor failed to fetch task '+reminderTaskId+': '+err);
+                                var taskDetail = task.Items[0];
+                                if (taskDetail)
+                                {
+                                    tasks.setStatus(taskDetail.id, tasks.SUCCESS, function(err, data){
+                                        err && logger.logError('Failed to cancel Reminder for Opened Email: '+taskDetail.id,taskDetail);
+                                        !err && logger.logInfo('Canceled Reminder for Opened Email: '+taskDetail.id,taskDetail);
+                                        onComplete(err,null);
+                                    });
+                                    return;
+                                }
+                                logger.logInfo('Fetching Reminder Task by RefId to Cancel '+reminderTaskId,taskDetail);
+                                onComplete('No Task detail, unable to update status for '+ reminderTaskId, null);
                             }
                             else
                             {
-                                logger.logInfo('No task to update for '+reminderTaskId);
-                                err = null;
+                                if (err)
+                                {
+                                    logger.logError('sqsProcessor failed to fetch task '+reminderTaskId+': '+err);
+                                }
+                                else
+                                {
+                                    logger.logInfo('No task to update for '+reminderTaskId);
+                                    err = null;
+                                }
+                                onComplete(err, null);
                             }
-                            onComplete(err, null);
-                        }
-                    });
+                        });
+                    }
+                    else
+                    {
+                        logger.logError('Unable to find RefId for message', sqsMessage);
+                        onComplete(null, null);
+                    }
+
                 }
                 else
                 {
