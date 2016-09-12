@@ -13,5 +13,7 @@ process.env = {
     ENVIRONMENT: 'Tests',
     RUN_INTERVAL: 1,
     TEST_RUNNER: true,
-    IP_ADDRESS: 8080
+    IP_ADDRESS: 8080,
+    SQS_WATCHERS: 2,
+    MAX_SQS_MESSAGE: 5
 };
