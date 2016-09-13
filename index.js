@@ -452,6 +452,10 @@ sqsWatcher.start(function(err, queueData, event, onComplete){
         {
             var sqsBody = JSON.parse(event.message.Body);
             var sqsMessage = JSON.parse(sqsBody.Message);
+            if (typeof sqsMessage.event != 'undefined')
+            {
+                sqsMessage = sqsMessage.event;
+            }
 
             if (event.name.indexOf('ReminderCancellations') != -1)
             {
@@ -469,10 +473,6 @@ sqsWatcher.start(function(err, queueData, event, onComplete){
                 }
                 if (eventMapDetail !== null)
                 {
-                    if (typeof sqsMessage.event != 'undefined')
-                    {
-                        sqsMessage = sqsMessage.event;
-                    }
                     var reminderTaskId = sqsMessage[eventMapDetail.idField];
 
                     if (typeof reminderTaskId != 'undefined' && reminderTaskId.indexOf(':') != -1)
