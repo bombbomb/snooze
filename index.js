@@ -525,7 +525,7 @@ sqsWatcher.start(function(err, queueData, event, onComplete){
                 else
                 {
                     logger.logError('Unable to find event map for event', sqsMessage);
-                    onComplete('Unable to find event map for event');
+                    onComplete('Unable to find event map for event', null);
                 }
 
             }
