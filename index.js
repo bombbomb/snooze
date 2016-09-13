@@ -463,10 +463,6 @@ sqsWatcher.start(function(err, queueData, event, onComplete){
                         if (!queueData.eventMap.hasOwnProperty(map)) continue;
                         eventMapDetail = queueData.eventMap[map];
                         eventType = sqsMessage[eventMapDetail.eventField];
-                        if (typeof eventType == 'undefined')
-                        {
-                            logger.logError('EventMapDetail and sqsMessage from app : ' + eventMapDetail, sqsMessage);
-                        }
                         if (sqsMessage[eventMapDetail.eventField] == eventMapDetail.eventValue)
                         {
                             break;
