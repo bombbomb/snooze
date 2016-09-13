@@ -453,6 +453,7 @@ sqsWatcher.start(function(err, queueData, event, onComplete){
             var sqsBody = JSON.parse(event.message.Body);
             var sqsMessage = JSON.parse(sqsBody.Message);
             var eventType = '';
+
             if (event.name.indexOf('ReminderCancellations') != -1)
             {
                 var eventMapDetail = null;
@@ -462,6 +463,10 @@ sqsWatcher.start(function(err, queueData, event, onComplete){
                         if (!queueData.eventMap.hasOwnProperty(map)) continue;
                         eventMapDetail = queueData.eventMap[map];
                         eventType = sqsMessage[eventMapDetail.eventField];
+                        if (typeof eventType == 'undefined')
+                        {
+                            logger.logError('EventMapDetail and sqsMessage from app : ' + eventMapDetail, sqsMessage);
+                        }
                         if (sqsMessage[eventMapDetail.eventField] == eventMapDetail.eventValue)
                         {
                             break;
