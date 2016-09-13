@@ -452,7 +452,7 @@ sqsWatcher.start(function(err, queueData, event, onComplete){
         {
             var sqsBody = JSON.parse(event.message.Body);
             var sqsMessage = JSON.parse(sqsBody.Message);
-
+            var eventType = '';
             if (event.name.indexOf('ReminderCancellations') != -1)
             {
                 var eventMapDetail = null;
@@ -461,12 +461,14 @@ sqsWatcher.start(function(err, queueData, event, onComplete){
                     {
                         if (!queueData.eventMap.hasOwnProperty(map)) continue;
                         eventMapDetail = queueData.eventMap[map];
+                        eventType = sqsMessage[eventMapDetail.eventField];
                         if (sqsMessage[eventMapDetail.eventField] == eventMapDetail.eventValue)
                         {
                             break;
                         }
                     }
                 }
+
                 if (eventMapDetail !== null)
                 {
                     if (typeof sqsMessage.event != 'undefined')
@@ -517,7 +519,7 @@ sqsWatcher.start(function(err, queueData, event, onComplete){
                     }
                     else
                     {
-                        logger.logError('Unable to find RefId for message', sqsMessage);
+                        logger.logError('Unable to find RefId for message, type '+eventType, sqsMessage);
                         onComplete(null, null);
                     }
 
@@ -525,7 +527,7 @@ sqsWatcher.start(function(err, queueData, event, onComplete){
                 else
                 {
                     logger.logError('Unable to find event map for event', sqsMessage);
-                    onComplete('Unable to find event map for event');
+                    onComplete('Unable to find event map for event', null);
                 }
 
             }
