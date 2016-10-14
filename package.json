@@ -43,6 +43,7 @@
     "grunt-mocha-test": "^0.12.7",
     "istanbul": "^0.4.2",
     "karma": "^0.13.22",
+    "leveldown": "^1.4.4",
     "mocha": "^2.4.5",
     "mocha-istanbul": "^0.2.0",
     "proxyquire": "^1.7.4",
