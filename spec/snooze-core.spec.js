@@ -8,11 +8,37 @@ var assert              = require('assert'),
 
 var testEnvVars         = require('../test/test.env.js');
 
+var deleteFolderRecursive = function(path) {
+    try
+    {
+        if ( fs.statSync(path) )
+        {
+            fs.readdirSync(path).forEach(function(file,index){
+                var curPath = path + "/" + file;
+                if(fs.lstatSync(curPath).isDirectory())
+                { // recurse
+                    deleteFolderRecursive(curPath);
+                }
+                else
+                { // delete file
+                    fs.unlinkSync(curPath);
+                }
+            });
+            fs.rmdirSync(path);
+            console.info("Deleted "+path+" successfully.");
+        }
+    }
+    catch (e)
+    {
+        console.error("Couldn't delete the Dynalite folder, didn't exist?");
+    }
+
+};
+
+deleteFolderRecursive('./snooze-db');
+
 var token = jwt.sign({ foo: 'bar', expires: (Date.now()/1000) + (60 * 60 * 24) }, process.env.JWT_SECRET);
-
 var tasks = require('../core/tasks');
-
-
 
 // Stub Overrides
 
