@@ -23,11 +23,11 @@ var sqsProcessorOptions = {
     logger: function(message,payload,type) {
         if (type)
         {
-            logger.log(message,type.toUpperCase(),payload);
+            logger.log('sqsProcessor Message Error '+message,type.toUpperCase(),payload);
         }
         else
         {
-            logger.log(message, 'LOG', payload);
+            logger.log('sqsProcessor Message Error '+message, 'LOG', payload);
         }
     },
     maxNumberOfMessages: process.env.MAX_SQS_MESSAGE,
@@ -446,7 +446,7 @@ sqsWatcher.start(function(err, queueData, event, onComplete){
     {
         if (err)
         {
-            logger.logError('sqsProcessor Error: '+err);
+            throw new Error(err);
         }
         else
         {
