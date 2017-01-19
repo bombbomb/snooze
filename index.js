@@ -148,40 +148,52 @@ app.post('/add', function (req, res, next) {
     authenticate(req, res, function(jwt){
 
         // check requirements for adding a thing
-        if (task && (typeof task == 'object' || (typeof task == 'string' && isJSON(task)) ))
+        if (typeof task == 'object' || (typeof task == 'string' && isJSON(task)) )
         {
 
-            if (typeof task == 'string')
+            try
             {
-                task = JSON.parse(task);
-            }
+                if (typeof task == 'string')
+                {
+                    task = JSON.parse(task);
+                }
 
-            if (task.snsTask)
-            {
-                snsMap.getTarget(task.snsTask,function(err,taskInfo){
-                    if (err || !taskInfo.snsTarget)
-                    {
-                        logger.logError('Failed to retrieve snsTask Target for '+task.snsTask);
-                        returnError(res, 'Failed to retrieve snsTask Target for '+task.snsTask);
-                    }
-                    else
-                    {
-                        task = _.extend(task,{ snsTarget: taskInfo.snsTarget });
-                        delete task.snsTask;
-                        addTask(task);
-                    }
-                });
+                if (task.snsTask)
+                {
+                    snsMap.getTarget(task.snsTask,function(err,taskInfo){
+                        if (err)
+                        {
+                            logger.logError('Failed to retrieve snsTask Target for '+task.snsTask,err);
+                            returnError(res, 'Failed to retrieve snsTask Target for '+task.snsTask);
+                        }
+                        else if (typeof taskInfo == 'undefined' || !taskInfo.snsTarget)
+                        {
+                            logger.logError('No snsTask Target exists for '+task.snsTask,err);
+                            returnError(res, 'No snsTask Target exists for '+task.snsTask);
+                        }
+                        else
+                        {
+                            task = Object.assign(task,{ snsTarget: taskInfo.snsTarget });
+                            delete task.snsTask;
+                            addTask(task);
+                        }
+                    });
+                }
+                else
+                {
+                    addTask(task);
+                }
             }
-            else
+            catch (e)
             {
-                addTask(task);
+                logger.logError('Exception occurred adding task ',e);
+                returnError(res, 'Add Task Failed; '+e.message);
             }
 
         }
         else
         {
             returnError(res, 'no task specified, or not a valid object?!');
-            return;
         }
 
     });
