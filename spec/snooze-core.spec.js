@@ -1,5 +1,6 @@
 var assert              = require('assert'),
     proxyquire          = require('proxyquire'),
+    fs                  = require('fs'),
     request             = require('supertest'),
     sinon               = require('sinon'),
     dynalite            = require('dynalite'),
@@ -119,7 +120,8 @@ describe('Snooze Test Suite', function() {
         it('tests if snooze is up', function(done){
             request(snooze)
                 .get('/')
-                .expect(200, 'Snooze is up.', done);
+                .expect(200, 'Snooze is up.')
+                .end(done);
         });
 
         it('test against /add fails', function(done) {
@@ -127,7 +129,8 @@ describe('Snooze Test Suite', function() {
                 .post('/add')
                 .set(process.env.JWT_HEADER, token)
                 .send({})
-                .expect(500, 'crap no task specified, or not a valid object?!', done);
+                .expect(500, 'crap no task specified, or not a valid object?!')
+                .end(done);
         });
 
         it('test against /add', function(done) {
@@ -143,25 +146,27 @@ describe('Snooze Test Suite', function() {
                 }
                 })
                 .expect(200)
-                .expect(function(res){
+                .end(function(err, res){
                     editID = res.body.id;
                     if(!res.body.id)
                     {
-                        throw new Error('incorrect ID being returned');
+                        done(new Error('incorrect ID being returned'));
                     }
                     else
                     {
-                        return true;
+                        done(err);
                     }
-                }).end(done);
+                });
         });
 
+        // TODO; need to figure out why this test seems to break EVERYTHING!!!!
         it('only accepts valid json', function(done) {
             request(snooze)
                 .post('/add')
                 .set(process.env.JWT_HEADER, token)
                 .send({task : 'String, Not Valid JSON'})
-                .expect(500, 'crap no task specified, or not a valid object?!', done);
+                .expect(500, 'crap no task specified, or not a valid object?!')
+                .end(done);
         });
     });
 
@@ -173,35 +178,36 @@ describe('Snooze Test Suite', function() {
                 .set(process.env.JWT_HEADER, token)
                 .expect(200)
                 .expect('Content-Type', 'application/json; charset=utf-8')
-                .expect(function(res){
+                .end(function(err,res){
                     if (res.status !== 200)
                     {
-                        throw new Error('status is not 200');
+                        done(new Error('status is not 200'));
                     }
-                    if (process.env.DYNAMO_ENDPOINT.indexOf('localhost') === -1 && res.body.task.status !== 2)
+                    else if (process.env.DYNAMO_ENDPOINT.indexOf('localhost') === -1 && res.body.task.status !== 2)
                     {
-                        throw new Error('incorrect attribute');
+                        done(new Error('incorrect attribute'));
                     }
-                    return true;
-                })
-                .end(done);
+                    else
+                    {
+                        done(err);
+                    }
+                });
         });
 
         it('sends back an error if task is not found', function(done) {
             request(snooze)
                 .put('/cancel/4')
                 .expect(500)
-                .expect(function(res) {
+                .end(function(err,res) {
                     if (res.body.success === true)
                     {
-                        throw new Error('Task should not exist');
+                        done(new Error('Task should not exist'));
                     }
                     else
                     {
-                        return true;
+                        done(err);
                     }
-                })
-                .end(done);
+                });
         });
 
     });
@@ -213,21 +219,20 @@ describe('Snooze Test Suite', function() {
             request(snooze)
                 .get('/is/' + editID)
                 .expect(200)
-                .expect(function(res) {
+                .end(function(err,res) {
                     if(!res.body.task)
                     {
-                        throw new Error('No task returned');
+                        done(new Error('No task returned'));
                     }
-                    else if (!res.body.task.ts || !res.body.task.status || !res.body.task.added_timestamp)
+                    else if (!res.body.task.ts || typeof res.body.task.status == 'undefined' || !res.body.task.added_timestamp)
                     {
-                        throw new Error('Missing Task Information');
+                        done(new Error('Missing Task Information'));
                     }
                     else
                     {
-                        return true;
+                        done(err);
                     }
-                })
-                .end(done);
+                });
         });
 
         it('should return error when task does not exist with that id', function(done) {
@@ -235,20 +240,20 @@ describe('Snooze Test Suite', function() {
             request(snooze)
                 .get('/is/310')
                 .expect(500)
-                .expect(function(res) {
-                    if (res.body.task)
+                .end(function(err,res) {
+                    if (res && res.body.task)
                     {
-                        throw new Error('There should be no task with this id');
+                        done(new Error('There should be no task with this id'));
                     }
                     else if (res.body.message !== 'Task does not exist')
                     {
-                        throw new Error('Incorrect message sent back');
+                        done(new Error('Incorrect message sent back'));
                     }
                     else
                     {
-                        return true;
+                        done(err);
                     }
-                }).end(done);
+                });
 
         });
 
@@ -262,9 +267,8 @@ describe('Snooze Test Suite', function() {
                 .get('/health-check')
                 .expect(200)
                 .end(function(err, res) {
-                    if(err) throw err;
                     console.log('health res : ', res.body);
-                    done();
+                    done(err);
                 });
 
         });
@@ -308,7 +312,7 @@ describe('Snooze Test Suite', function() {
 
         beforeEach(function(done) {
             addUrlTask(tasks[counter].url, tasks[counter].delay, '111' + counter);
-            setTimeout(done, 3000);
+            setTimeout(done, 3500);
         });
 
 
@@ -317,15 +321,13 @@ describe('Snooze Test Suite', function() {
                 .get('/is/' + id)
                 .expect(200)
                 .end(function(err, res) {
-                    if(err) throw err;
                     if(res.body.task.status !== 0)
                     {
-                        throw new Error('task should still be pending');
+                        done(new Error('task should still be pending'));
                     }
                     else
                     {
-                        done();
-                        return true;
+                        done(err);
                     }
                 });
         });
@@ -335,15 +337,13 @@ describe('Snooze Test Suite', function() {
                 .get('/is/' + id)
                 .expect(200)
                 .end(function(err, res) {
-                    if(err) throw err;
                     if(res.body.task.status !== 9)
                     {
-                        throw new Error('Task should have been successful');
+                        done(new Error('Task should have been successful'));
                     }
                     else
                     {
-                        done();
-                        return true;
+                        done(err);
                     }
                 });
         });
@@ -353,15 +353,13 @@ describe('Snooze Test Suite', function() {
                 .put('/cancel/' + id)
                 .expect(200)
                 .end(function(err, res) {
-                    if(err) throw err;
                     if(res.body.task.status !== 2)
                     {
-                        throw new Error('Task should have been cancelled');
+                        done(new Error('Task should have been cancelled'));
                     }
                     else
                     {
-                        done();
-                        return true;
+                        done(err);
                     }
                 });
         });
@@ -407,15 +405,13 @@ describe('Snooze Test Suite', function() {
                 .get('/is/' + id)
                 .expect(200)
                 .end(function(err, res) {
-                    if(err) throw err;
                     if(res.body.task.status !== 1)
                     {
-                        throw new Error('Task should still be running');
+                        done(new Error('Task should still be running'));
                     }
                     else
                     {
-                        done();
-                        return true;
+                        done(err);
                     }
                 });
         });
@@ -437,22 +433,20 @@ describe('Snooze Test Suite', function() {
                     ts: date + 10000,
                     url: 'https://www.google.com',
                     status : 0,
-                    refId: '12345',
+                    refId: '123457',
                     clientId : 'abcde'
                 }
                 })
                 .expect(200)
                 .end(function(err, res) {
-                    if(err) throw err;
                     if(!res.body.id)
                     {
-                        throw new Error ('no id was returned');
+                        done(new Error('no id was returned'));
                     }
                     else
                     {
                         taskId = res.body.id;
-                        done();
-                        return true;
+                        done(err);
                     }
                 });
         });
@@ -462,16 +456,14 @@ describe('Snooze Test Suite', function() {
                 .get('/is/' + taskId)
                 .expect(200)
                 .end(function(err, res) {
-                    if(err) throw err;
-                    if(res.body.task.refId !== '12345')
+                    if(res.body.task.refId !== '123457')
                     {
-                        throw new Error ('incorrect reference Id returned')
+                        done(new Error('incorrect reference Id returned'));
                     }
                     else
                     {
                         refId = res.body.task.refId;
-                        done();
-                        return true;
+                        done(err);
                     }
                 });
         });
@@ -481,16 +473,14 @@ describe('Snooze Test Suite', function() {
                 .get('/isbyref/' + refId)
                 .expect(200)
                 .end(function(err, res) {
-                    if(err) throw err;
                     console.log(res.body);
                     if(res.body.task.id !== taskId || res.body.task.refId !== refId)
                     {
-                        throw new Error ('incorrect reference id or task id returned')
+                        done(new Error('incorrect reference id or task id returned'));
                     }
                     else
                     {
-                        done();
-                        return true;
+                        done(err);
                     }
                 });
         });
@@ -534,19 +524,17 @@ describe('Snooze Test Suite', function() {
                 })
                 .expect(200)
                 .end(function(err, res) {
-                    if(err) throw err;
                     if(res.body.task.refId !== '67890')
                     {
-                        throw new Error ('the reference Id hasn\'t been updated')
+                        done(new Error('the reference Id hasn\'t been updated'));
                     }
                     else if (res.body.task.ts !== newTs)
                     {
-                        throw new Error ('The timestamp hasn\'t been updated')
+                        done(new Error('The timestamp hasn\'t been updated'));
                     }
                     else
                     {
-                        done();
-                        return true;
+                        done(err);
                     }
                 });
         });
@@ -573,7 +561,7 @@ describe('Snooze Test Suite', function() {
                 })
                 .end(function(err, res) {
                     taskId = res.body.id;
-                    done();
+                    done(err);
                 });
         });
 
@@ -592,15 +580,13 @@ describe('Snooze Test Suite', function() {
                 })
                 .expect(500)
                 .end(function(err, res) {
-                    if (err) throw err;
                     if(res.body.success)
                     {
-                        throw new Error ('task should not have been added')
+                        done(new Error('task should not have been added'));
                     }
                     else
                     {
-                        done();
-                        return true;
+                        done(err);
                     }
                 });
         });
@@ -631,16 +617,14 @@ describe('Snooze Test Suite', function() {
                 })
                 .expect(200)
                 .end(function(err, res) {
-                    if(err) throw err;
                     if (!res.body.success)
                     {
-                        throw new Error ('task not added!!')
+                        done(new Error('task not added!!'));
                     }
                     else
                     {
                         taskId = res.body.id;
-                        done();
-                        return true;
+                        done(err);
                     }
                 });
         });
@@ -650,15 +634,13 @@ describe('Snooze Test Suite', function() {
                 .get('/is/' + taskId)
                 .expect(200)
                 .end(function(err, res) {
-                    if(err) throw err;
                     if(!res.body.success)
                     {
-                        throw new Error('Task wasnt retrieved from the database correctly');
+                        done(new Error('Task wasnt retrieved from the database correctly'));
                     }
                     else
                     {
-                        done();
-                        return true;
+                        done(err);
                     }
                 });
         });
@@ -701,16 +683,14 @@ describe('Snooze Test Suite', function() {
                 })
                 .expect(200)
                 .end(function(err, res) {
-                    if(err) throw err;
                     if (!res.body.success)
                     {
-                        throw new Error ('task not added!!')
+                        done('task not added!!');
                     }
                     else
                     {
                         taskId = res.body.id;
-                        done();
-                        return true;
+                        done(err);
                     }
                 });
         });
@@ -744,7 +724,7 @@ describe('Snooze Test Suite', function() {
                 assert.equal(res.result.body.url, 'https://www.linkedIn.com');
                 assert.equal(res.result.body.refId, '22222');
                 assert.equal(res.result.body.clientId, 'abcde');
-                done();
+                done(err);
             })
         })
 
