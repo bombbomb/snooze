@@ -28,7 +28,7 @@
     "https": "^1.0.0",
     "jsonwebtoken": "^5.7.0",
     "node-elk-logger": "^0.1.5",
-    "request": "^2.73.0",
+    "request": "^2.79.0",
     "sasquatcha": "^0.1.1",
     "statsd-client": "^0.2.1",
     "underscore": "^1.8.3"
