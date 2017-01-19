@@ -90,11 +90,10 @@ Tasks.prototype.addTask = function(task,callback)
             {
                 errorMessage = err.message;
                 console.info('Tasks; error adding a task',err);
-
             }
             else
             {
-                console.info('Tasks; added a new task! '+newId,data);
+                console.info('Tasks; added a new task! '+newId,itemRecord);
             }
             callback(errorMessage,newId);
         });
@@ -184,49 +183,51 @@ Tasks.prototype.getClientTasksByStatus = function (status, clientId, callback)
     },callback);
 };
 
-Tasks.prototype.getTask = function(id, callback)
-{
+Tasks.prototype.getTask = function(id, callback) {
 
     if (!id)
     {
         callback('ID is required', null);
     }
+    else
+    {
+        var queryOptions = {
+            TableName : this.getDbTableName(),
+            Key : {
+                id : id
+            }
+        };
 
-    var queryOptions = {
-        TableName : this.getDbTableName(),
-        Key : {
-            id : id
-        }
-    };
-
-    this.dynamo.getItem(queryOptions, function(err, data) {
-        if (err)
-        {
-            return callback (err, null);
-        }
-        else if (data.Item)
-        {
-            return callback(null, data.Item);
-        }
-        return callback(err, null);
-    });
+        this.dynamo.getItem(queryOptions, function(err, data) {
+            if (err)
+            {
+                return callback (err, null);
+            }
+            else if (data.Item)
+            {
+                return callback(null, data.Item);
+            }
+            return callback(err, null);
+        });
+    }
 
 };
 
 Tasks.prototype.getTaskByRef = function (refId,callback)
 {
-    if(!refId)
+    if (!refId)
     {
         callback('Reference ID is required!');
     }
-
-    this.getTasks({
-        IndexName: 'refId-index',
-        KeyConditions: [
-            this.dynamo.Condition("refId", "EQ", refId)
-        ]
-    },callback);
-
+    else
+    {
+        this.getTasks({
+            IndexName: 'refId-index',
+            KeyConditions: [
+                this.dynamo.Condition("refId", "EQ", refId)
+            ]
+        },callback);
+    }
 };
 
 Tasks.prototype.getTasksByClient = function (clientId,callback)
