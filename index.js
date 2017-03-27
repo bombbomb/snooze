@@ -17,6 +17,7 @@ var snsMap          = require('./core/snsMap');
 var tasks           = require('./core/tasks');
 
 var runner          = require('./core/runner');
+var user            = require('./util/user');
 
 var sqsProcessorOptions = {
     tableName: process.env.ENVIRONMENT + '_SnoozeSQSWatcher',
@@ -75,7 +76,7 @@ app.get('/', function (req, res, next) {
 
 app.post('/snsTarget', function(req, res, next){
 
-    authenticate(req, res, function(jwt){
+    user.authenticate(req, res, function(clientId){
         snsMap.addTarget(req.body,function(err,taskInfo){
             if (err)
             {
@@ -92,7 +93,7 @@ app.post('/snsTarget', function(req, res, next){
 
 app.get('/snsTarget/:taskType', function(req, res, next){
 
-    authenticate(req, res, function(jwt) {
+    user.authenticate(req, res, function(clientId) {
         snsMap.getTarget(req.params.taskType,function(err,snsTargets){
             if (err)
             {
@@ -145,7 +146,7 @@ app.post('/add', function (req, res, next) {
         });
     };
 
-    authenticate(req, res, function(jwt){
+    user.authenticate(req, res, function(clientId){
 
         // check requirements for adding a thing
         if (typeof task == 'object' || (typeof task == 'string' && isJSON(task)) )
@@ -385,24 +386,6 @@ app.put('/task/:id', function(req, res, next) {
     });
 
 });
-
-function authenticate(req, res, callback)
-{
-    var decodedToken = '';
-    if (process.env.JWT_HEADER)
-    {
-        var token = req.get(process.env.JWT_HEADER);
-        decodedToken = bbJWT.decodeToken(token);
-        var reqIP = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-        if (decodedToken === false)
-        {
-            sdc.incrMetric('userAuthenticationFailed');
-            returnError(res, 'Invalid JWT from '+reqIP);
-            return;
-        }
-    }
-    callback && callback(decodedToken);
-}
 
 function returnError(res,err)
 {
