@@ -18,7 +18,7 @@
   "homepage": "https://github.com/bombbomb/snooze",
   "dependencies": {
     "aws-sdk": "^2.3.6",
-    "bbjwt-client": "^0.1.2",
+    "bbjwt-client": "^0.5.3",
     "body-parser": "^1.15.0",
     "cookie-parser": "^1.4.1",
     "dynamodb-doc": "^1.0.0",
