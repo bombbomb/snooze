@@ -5,7 +5,12 @@ module.exports = {
 
     authenticate : function(req, res, next)
     {
-        if (process.env.JWT_HEADER) {
+        var token = req.get('Authorization');
+        if (!token && process.env.JWT_HEADER)
+        {
+            token = req.get(process.env.JWT_HEADER);
+        }
+        if (token) {
             var token = req.get(process.env.JWT_HEADER);
             bbJwt.getClientIdFromToken(token, function (err, clientId) {
                 var reqIP = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
@@ -20,6 +25,10 @@ module.exports = {
                     next(clientId);
                 }
             })
+        }
+        else
+        {
+            next();
         }
     }
 
