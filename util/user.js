@@ -12,7 +12,6 @@ module.exports = {
         }
         if (token)
         {
-            var token = req.get(process.env.JWT_HEADER);
             bbJwt.getClientIdFromToken(token, function (err, clientId) {
                 var reqIP = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
                 if (err)
