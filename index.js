@@ -81,16 +81,19 @@ app.post('/snsTarget', function(req, res, next){
         {
             returnErrorJson(res, 'User Authentication failed');
         }
-        snsMap.addTarget(req.body,function(err,taskInfo){
-            if (err)
-            {
-                returnErrorJson(res, 'Error adding target; '+err);
-            }
-            else
-            {
-                returnSuccessJson(res, {message: 'SNS Target Added for '+taskInfo.taskType });
-            }
-        });
+        else
+        {
+            snsMap.addTarget(req.body,function(err,taskInfo){
+                if (err)
+                {
+                    returnErrorJson(res, 'Error adding target; '+err);
+                }
+                else
+                {
+                    returnSuccessJson(res, {message: 'SNS Target Added for '+taskInfo.taskType });
+                }
+            });
+        }
     });
 
 });
@@ -102,16 +105,19 @@ app.get('/snsTarget/:taskType', function(req, res, next){
         {
             returnErrorJson(res, 'User Authentication failed');
         }
-        snsMap.getTarget(req.params.taskType,function(err,snsTargets){
-            if (err)
-            {
-                returnErrorJson(res, 'Error occurred retrieving snsTargets; '+err);
-            }
-            else
-            {
-                returnSuccessJson(res, snsTargets);
-            }
-        });
+        else
+        {
+            snsMap.getTarget(req.params.taskType,function(err,snsTargets){
+                if (err)
+                {
+                    returnErrorJson(res, 'Error occurred retrieving snsTargets; '+err);
+                }
+                else
+                {
+                    returnSuccessJson(res, snsTargets);
+                }
+            });
+        }
     });
 
 });
@@ -160,55 +166,57 @@ app.post('/add', function (req, res, next) {
         {
             returnErrorJson(res, 'User Authentication failed');
         }
-        // check requirements for adding a thing
-        if (typeof task == 'object' || (typeof task == 'string' && isJSON(task)) )
-        {
-
-            try
-            {
-                if (typeof task == 'string')
-                {
-                    task = JSON.parse(task);
-                }
-
-                if (task.snsTask)
-                {
-                    snsMap.getTarget(task.snsTask,function(err,taskInfo){
-                        if (err)
-                        {
-                            logger.logError('Failed to retrieve snsTask Target for '+task.snsTask,err);
-                            returnError(res, 'Failed to retrieve snsTask Target for '+task.snsTask);
-                        }
-                        else if (typeof taskInfo == 'undefined' || !taskInfo.snsTarget)
-                        {
-                            logger.logError('No snsTask Target exists for '+task.snsTask,err);
-                            returnError(res, 'No snsTask Target exists for '+task.snsTask);
-                        }
-                        else
-                        {
-                            task = Object.assign(task,{ snsTarget: taskInfo.snsTarget });
-                            delete task.snsTask;
-                            addTask(task);
-                        }
-                    });
-                }
-                else
-                {
-                    addTask(task);
-                }
-            }
-            catch (e)
-            {
-                logger.logError('Exception occurred adding task ',e);
-                returnError(res, 'Add Task Failed; '+e.message);
-            }
-
-        }
         else
         {
-            returnError(res, 'no task specified, or not a valid object?!');
-        }
+            // check requirements for adding a thing
+            if (typeof task == 'object' || (typeof task == 'string' && isJSON(task)) )
+            {
 
+                try
+                {
+                    if (typeof task == 'string')
+                    {
+                        task = JSON.parse(task);
+                    }
+
+                    if (task.snsTask)
+                    {
+                        snsMap.getTarget(task.snsTask,function(err,taskInfo){
+                            if (err)
+                            {
+                                logger.logError('Failed to retrieve snsTask Target for '+task.snsTask,err);
+                                returnError(res, 'Failed to retrieve snsTask Target for '+task.snsTask);
+                            }
+                            else if (typeof taskInfo == 'undefined' || !taskInfo.snsTarget)
+                            {
+                                logger.logError('No snsTask Target exists for '+task.snsTask,err);
+                                returnError(res, 'No snsTask Target exists for '+task.snsTask);
+                            }
+                            else
+                            {
+                                task = Object.assign(task,{ snsTarget: taskInfo.snsTarget });
+                                delete task.snsTask;
+                                addTask(task);
+                            }
+                        });
+                    }
+                    else
+                    {
+                        addTask(task);
+                    }
+                }
+                catch (e)
+                {
+                    logger.logError('Exception occurred adding task ',e);
+                    returnError(res, 'Add Task Failed; '+e.message);
+                }
+
+            }
+            else
+            {
+                returnError(res, 'no task specified, or not a valid object?!');
+            }
+        }
     });
 
 });
