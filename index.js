@@ -77,7 +77,7 @@ app.get('/', function (req, res, next) {
 app.post('/snsTarget', function(req, res, next){
 
     user.authenticate(req, res, function(clientId){
-        if (!clientId)
+        if (!req.clientId)
         {
             returnErrorJson(res, 'User Authentication failed');
         }
@@ -101,7 +101,7 @@ app.post('/snsTarget', function(req, res, next){
 app.get('/snsTarget/:taskType', function(req, res, next){
 
     user.authenticate(req, res, function(clientId) {
-        if (!clientId)
+        if (!req.clientId)
         {
             returnErrorJson(res, 'User Authentication failed');
         }
@@ -162,7 +162,7 @@ app.post('/add', function (req, res, next) {
 
     user.authenticate(req, res, function(clientId){
 
-        if (!clientId)
+        if (!req.clientId)
         {
             returnErrorJson(res, 'User Authentication failed');
         }

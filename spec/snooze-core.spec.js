@@ -38,7 +38,7 @@ var deleteFolderRecursive = function(path) {
 
 deleteFolderRecursive('./snooze-db');
 
-var token = jwt.sign({ foo: 'bar', expires: (Date.now()/1000) + (60 * 60 * 24) }, process.env.JWT_SECRET);
+var token = jwt.sign({ foo: 'bar', expires: (Date.now()/1000) + (60 * 60 * 24), clientId : 'THISISACLIENTID' }, process.env.JWT_SECRET);
 var tasks = require('../core/tasks');
 
 // Stub Overrides
