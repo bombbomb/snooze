@@ -77,6 +77,10 @@ app.get('/', function (req, res, next) {
 app.post('/snsTarget', function(req, res, next){
 
     user.authenticate(req, res, function(clientId){
+        if (!clientId)
+        {
+            returnErrorJson(res, 'User Authentication failed');
+        }
         snsMap.addTarget(req.body,function(err,taskInfo){
             if (err)
             {
@@ -94,6 +98,10 @@ app.post('/snsTarget', function(req, res, next){
 app.get('/snsTarget/:taskType', function(req, res, next){
 
     user.authenticate(req, res, function(clientId) {
+        if (!clientId)
+        {
+            returnErrorJson(res, 'User Authentication failed');
+        }
         snsMap.getTarget(req.params.taskType,function(err,snsTargets){
             if (err)
             {
@@ -148,6 +156,10 @@ app.post('/add', function (req, res, next) {
 
     user.authenticate(req, res, function(clientId){
 
+        if (!clientId)
+        {
+            returnErrorJson(res, 'User Authentication failed');
+        }
         // check requirements for adding a thing
         if (typeof task == 'object' || (typeof task == 'string' && isJSON(task)) )
         {

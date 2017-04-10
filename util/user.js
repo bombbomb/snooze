@@ -10,11 +10,13 @@ module.exports = {
         {
             token = req.get(process.env.JWT_HEADER);
         }
-        if (token) {
+        if (token)
+        {
             var token = req.get(process.env.JWT_HEADER);
             bbJwt.getClientIdFromToken(token, function (err, clientId) {
                 var reqIP = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-                if (err) {
+                if (err)
+                {
                     sdc.incrMetric('userAuthenticationFailed');
                     next(new Error('Invalid JWT from ' + reqIP));
                 }
