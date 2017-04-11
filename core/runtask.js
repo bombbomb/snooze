@@ -1,9 +1,9 @@
+var https       = require('https');
+var request     = require('request');
+var AWS         = require('aws-sdk');
 
 try
 {
-    var https       = require('https');
-    var request     = require('request');
-    var AWS         = require('aws-sdk');
     var logger      = require('./../util/logger');
     var tasks       = require('./tasks');
 

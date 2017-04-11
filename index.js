@@ -17,6 +17,7 @@ var snsMap          = require('./core/snsMap');
 var tasks           = require('./core/tasks');
 
 var runner          = require('./core/runner');
+var user            = require('./util/user');
 
 var sqsProcessorOptions = {
     tableName: process.env.ENVIRONMENT + '_SnoozeSQSWatcher',
@@ -75,34 +76,48 @@ app.get('/', function (req, res, next) {
 
 app.post('/snsTarget', function(req, res, next){
 
-    authenticate(req, res, function(jwt){
-        snsMap.addTarget(req.body,function(err,taskInfo){
-            if (err)
-            {
-                returnErrorJson(res, 'Error adding target; '+err);
-            }
-            else
-            {
-                returnSuccessJson(res, {message: 'SNS Target Added for '+taskInfo.taskType });
-            }
-        });
+    user.authenticate(req, res, function(clientId){
+        if (!req.clientId)
+        {
+            returnErrorJson(res, 'User Authentication failed');
+        }
+        else
+        {
+            snsMap.addTarget(req.body,function(err,taskInfo){
+                if (err)
+                {
+                    returnErrorJson(res, 'Error adding target; '+err);
+                }
+                else
+                {
+                    returnSuccessJson(res, {message: 'SNS Target Added for '+taskInfo.taskType });
+                }
+            });
+        }
     });
 
 });
 
 app.get('/snsTarget/:taskType', function(req, res, next){
 
-    authenticate(req, res, function(jwt) {
-        snsMap.getTarget(req.params.taskType,function(err,snsTargets){
-            if (err)
-            {
-                returnErrorJson(res, 'Error occurred retrieving snsTargets; '+err);
-            }
-            else
-            {
-                returnSuccessJson(res, snsTargets);
-            }
-        });
+    user.authenticate(req, res, function(clientId) {
+        if (!req.clientId)
+        {
+            returnErrorJson(res, 'User Authentication failed');
+        }
+        else
+        {
+            snsMap.getTarget(req.params.taskType,function(err,snsTargets){
+                if (err)
+                {
+                    returnErrorJson(res, 'Error occurred retrieving snsTargets; '+err);
+                }
+                else
+                {
+                    returnSuccessJson(res, snsTargets);
+                }
+            });
+        }
     });
 
 });
@@ -145,45 +160,63 @@ app.post('/add', function (req, res, next) {
         });
     };
 
-    authenticate(req, res, function(jwt){
+    user.authenticate(req, res, function(clientId){
 
-        // check requirements for adding a thing
-        if (task && (typeof task == 'object' || (typeof task == 'string' && isJSON(task)) ))
+        if (!req.clientId)
         {
-
-            if (typeof task == 'string')
-            {
-                task = JSON.parse(task);
-            }
-
-            if (task.snsTask)
-            {
-                snsMap.getTarget(task.snsTask,function(err,taskInfo){
-                    if (err || !taskInfo.snsTarget)
-                    {
-                        logger.logError('Failed to retrieve snsTask Target for '+task.snsTask);
-                        returnError(res, 'Failed to retrieve snsTask Target for '+task.snsTask);
-                    }
-                    else
-                    {
-                        task = _.extend(task,{ snsTarget: taskInfo.snsTarget });
-                        delete task.snsTask;
-                        addTask(task);
-                    }
-                });
-            }
-            else
-            {
-                addTask(task);
-            }
-
+            returnErrorJson(res, 'User Authentication failed');
         }
         else
         {
-            returnError(res, 'no task specified, or not a valid object?!');
-            return;
-        }
+            // check requirements for adding a thing
+            if (typeof task == 'object' || (typeof task == 'string' && isJSON(task)) )
+            {
 
+                try
+                {
+                    if (typeof task == 'string')
+                    {
+                        task = JSON.parse(task);
+                    }
+
+                    if (task.snsTask)
+                    {
+                        snsMap.getTarget(task.snsTask,function(err,taskInfo){
+                            if (err)
+                            {
+                                logger.logError('Failed to retrieve snsTask Target for '+task.snsTask,err);
+                                returnError(res, 'Failed to retrieve snsTask Target for '+task.snsTask);
+                            }
+                            else if (typeof taskInfo == 'undefined' || !taskInfo.snsTarget)
+                            {
+                                logger.logError('No snsTask Target exists for '+task.snsTask,err);
+                                returnError(res, 'No snsTask Target exists for '+task.snsTask);
+                            }
+                            else
+                            {
+                                task = Object.assign(task,{ snsTarget: taskInfo.snsTarget });
+                                delete task.snsTask;
+                                addTask(task);
+                            }
+                        });
+                    }
+                    else
+                    {
+                        addTask(task);
+                    }
+                }
+                catch (e)
+                {
+                    logger.logError('Exception occurred adding task ',e);
+                    returnError(res, 'Add Task Failed; '+e.message);
+                }
+
+            }
+            else
+            {
+                returnError(res, 'no task specified, or not a valid object?!');
+            }
+        }
     });
 
 });
@@ -373,24 +406,6 @@ app.put('/task/:id', function(req, res, next) {
     });
 
 });
-
-function authenticate(req, res, callback)
-{
-    var decodedToken = '';
-    if (process.env.JWT_HEADER)
-    {
-        var token = req.get(process.env.JWT_HEADER);
-        decodedToken = bbJWT.decodeToken(token);
-        var reqIP = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-        if (decodedToken === false)
-        {
-            sdc.incrMetric('userAuthenticationFailed');
-            returnError(res, 'Invalid JWT from '+reqIP);
-            return;
-        }
-    }
-    callback && callback(decodedToken);
-}
 
 function returnError(res,err)
 {
