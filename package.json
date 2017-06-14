@@ -27,7 +27,7 @@
     "guid": "0.0.12",
     "https": "^1.0.0",
     "jsonwebtoken": "^5.7.0",
-    "node-elk-logger": "^0.1.5",
+    "node-elk-logger": "^0.1.6",
     "request": "^2.79.0",
     "sasquatcha": "^0.1.1",
     "statsd-client": "^0.2.1",
