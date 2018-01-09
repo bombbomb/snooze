@@ -285,9 +285,9 @@ describe('Snooze Test Suite', function() {
             {url : 'https://www.google.com', delay: 10}, //Pending = 0
             {url : 'https://www.google.com', delay : 0.2}, // Success = 9
             {url : 'https://www.google.com', delay : 20}, // Canceled = 2
-            //{delay: 1}, // Unknown = 11
-            //{url : 'http://asdasd', delay : 1}, // Error = 3
-            {url : 'https://asdasd.com/', delay : 1}
+            // {delay: 1}, // Unknown = 11
+            // {url : 'http://asdasd', delay : 1}, // Error = 3
+            // {url : 'https://asdasd.com/', delay : 1}
         ];
 
         function addUrlTask (url, delay, refId)
@@ -364,43 +364,43 @@ describe('Snooze Test Suite', function() {
                 });
         });
 
-        //it('should be unknown error with no URL entered', function(done) {
-        //    request(snooze)
-        //        .get('/is/' + id)
-        //        .expect(200)
-        //        .end(function(err, res) {
-        //            if(err) throw err;
-        //            if(res.body.task.status !== 11)
-        //            {
-        //                throw new Error('Task should be unknown, with no URL defined');
-        //            }
-        //            else
-        //            {
-        //                done();
-        //                return true;
-        //            }
-        //        });
-        //});
+        xit('should be unknown error with no URL entered', function(done) {
+           request(snooze)
+               .get('/is/' + id)
+               .expect(200)
+               .end(function(err, res) {
+                   if(err) throw err;
+                   if(res.body.task.status !== 11)
+                   {
+                       throw new Error('Task should be unknown, with no URL defined');
+                   }
+                   else
+                   {
+                       done();
+                       return true;
+                   }
+               });
+        });
 
-        //it('should error with http instead of https entered', function(done) {
-        //    request(snooze)
-        //        .get('/is/' + id)
-        //        .expect(200)
-        //        .end(function(err, res) {
-        //            if(err) throw err;
-        //            if(res.body.task.status !== 3)
-        //            {
-        //                throw new Error('Task should error out, http is being used');
-        //            }
-        //            else
-        //            {
-        //                done();
-        //                return true;
-        //            }
-        //        });
-        //});
+        xit('should error with http instead of https entered', function(done) {
+           request(snooze)
+               .get('/is/' + id)
+               .expect(200)
+               .end(function(err, res) {
+                   if(err) throw err;
+                   if(res.body.task.status !== 3)
+                   {
+                       throw new Error('Task should error out, http is being used');
+                   }
+                   else
+                   {
+                       done();
+                       return true;
+                   }
+               });
+        });
 
-        it('should show as running if process is ongoing', function(done) {
+        xit('should show as running if process is ongoing', function(done) {
             request(snooze)
                 .get('/is/' + id)
                 .expect(200)
