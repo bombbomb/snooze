@@ -2,7 +2,8 @@ language: node_js
 node_js:
 - '5'
 notifications:
-  slack: bombbomb:1NGTVbjUegZr88uffaUwizC9
+  slack:
+    secure: "F//+20hJqhfhMm4rCZQXlLn5ZdyfoYzhzvxeutT13r/ntH1EvnZ6tVsnXgk60yTHN38w4+PGsvRZUpRdvuc87q14kBtFttmEs1qrTCTLuDI8V+72Wg1IvRZgnzOud3ncSp0nE/VOpeosv+YTCpcDAR25Tsw1ig+683x43ASjR0rKso14lfAaTmt8HwpydbuXMR3O+hrKyiORvdHHpIO9db/KTL2WfZxVeMg7DDu/G4tF8foYou3HylLctaQFhKqiYuCQeccPnr+Kv0IUlwqyehCautpCE5yjW7U4b0New55jmtmT/crrczleJ3j74heDB6gSNpB2JxzR2mme/I+eSmKUaCrHM7ezUfqaFUMCR2FjJuAFXY2EfAVmrUyXPwEMhU8+I01HCsuUk+E+mwZcUfUHDM7R7Oe+6F7ajVdl/s86FR91kiJuL2BmZ3SwvSQkor4QKOmJjUkZWDrHqedUr3AxM/uKuCeK7mJ5V79aDIVymrgL3V9fK8nrNe3v2QwNOhbNHec/CIaO90Mer1vSHgMEKWaSyR+zNF5nOBROGQWsOSulGPTimKhk/CkJ1RR9QIheevcYjpZafarV2OK6UFsWU7dvKbx8QFXmXNIM5Fis2z7Vl5VZHUBWxoqGGXl/QsysXCT60wD/rr2MgfxPeFNQO+aEakANMfr2MgzbdpI="
 before_install: npm install -g grunt-cli
 install: npm install
 script:
