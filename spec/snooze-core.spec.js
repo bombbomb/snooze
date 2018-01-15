@@ -45,7 +45,10 @@ var tasks = require('../core/tasks');
 
 var loggerStub        = require('../util/logger');
 loggerStub.log = function(message,type,payload) {
-    console.log(message);
+    return new Promise((resolve) => {
+        console.log(message);
+        resolve();
+    });
 };
 loggerStub['@global'] = true;
 
