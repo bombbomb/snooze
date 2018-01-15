@@ -1,31 +1,59 @@
-var SDC = require('statsd-client');
+'use strict';
+const request   = require('./request');
+const logger    = require('./logger');
 
-function buildMetricName(metricName) {
-    return 'snooze.' + process.env.ENVIRONMENT + '.' + metricName;
+class Metrics
+{
+    constructor ()
+    {
+        this.settings = {
+            host : process.env.METRICS_HOST
+        }
+    }
+
+    increment (featureName, metric)
+    {
+        let path = `/feature/remo.${featureName}/${metric}/increment`;
+        this.sendMetricsRequest(path)
+            .catch((err) => {
+                console.error('Failed to send metrics request', err);
+            })
+    }
+
+    timing (featureName, metric)
+    {
+        let path = `/feature/remo.${featureName}/${metric}/timing`;
+        this.sendMetricsRequest(path)
+            .catch((err) => {
+                console.error('Failed to send metrics request', err);
+            })
+    }
+
+    sendMetricsRequest (path)
+    {
+        return new Promise((resolve, reject) => {
+            let options = {
+                host : this.settings.host,
+                path : path,
+                method : 'POST',
+                headers : {
+                    'Content-Type' : 'application/json'
+                }
+            };
+            let requestBody = {
+              environment : process.env.ENVIRONMENT,
+              xsrc : 'remo'
+            };
+            request.send(options, [], JSON.stringify(requestBody))
+                .then((data) => {
+                    resolve(data);
+                })
+                .catch((err) => {
+                    reject(err);
+                })
+        });
+    }
+
 }
 
-function BBMetrics() {
-    this.sdc = new SDC({ host: process.env.METRICS_HOST })
-}
-
-BBMetrics.prototype.incrMetric = function(metricName) {
-    var incrementMetricName = buildMetricName(metricName);
-    this.sdc.increment(incrementMetricName);
-};
-
-BBMetrics.prototype.timingMetric = function(metricName, startTime) {
-    var timingMetricName = buildMetricName(metricName);
-    this.sdc.timing(timingMetricName, startTime);
-};
-
-BBMetrics.prototype.gaugeMetric = function(metricName, value) {
-    var gaugeMetricName = buildMetricName(metricName);
-    this.sdc.gauge(gaugeMetricName, value);
-};
-
-BBMetrics.prototype.set = function(metricName, value) {
-    var gaugeMetricName = buildMetricName(metricName);
-    this.sdc.set(gaugeMetricName, value);
-};
-
-module.exports = new BBMetrics();
+module.exports = new Metrics();
