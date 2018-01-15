@@ -146,12 +146,12 @@ app.post('/add', function (req, res, next) {
                     if (err)
                     {
                         logger.logError('Error occurred adding a task: '+err,task);
-                        sdc.increment('addTaskError');
+                        sdc.increment('addTask', 'fail');
                         returnErrorJson(res, err);
                     }
                     else
                     {
-                        sdc.increment('addTaskSuccess');
+                        sdc.increment('addTask', 'success');
                         returnSuccessJson(res, { id: taskId, success: true, message: 'Task added' });
                     }
 
