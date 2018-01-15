@@ -13,7 +13,7 @@ class Metrics
 
     increment (featureName, metric)
     {
-        let path = `/feature/remo.${featureName}/${metric}/increment`;
+        let path = `/feature/snooze.${featureName}/${metric}/increment`;
         this.sendMetricsRequest(path)
             .catch((err) => {
                 console.error('Failed to send metrics request', err);
@@ -22,7 +22,7 @@ class Metrics
 
     timing (featureName, metric)
     {
-        let path = `/feature/remo.${featureName}/${metric}/timing`;
+        let path = `/feature/snooze.${featureName}/${metric}/timing`;
         this.sendMetricsRequest(path)
             .catch((err) => {
                 console.error('Failed to send metrics request', err);
@@ -42,7 +42,7 @@ class Metrics
             };
             let requestBody = {
               environment : process.env.ENVIRONMENT,
-              xsrc : 'remo'
+              xsrc : 'snooze'
             };
             request.send(options, [], JSON.stringify(requestBody))
                 .then((data) => {
