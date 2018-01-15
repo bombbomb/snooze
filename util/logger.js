@@ -31,7 +31,7 @@ class Logger
     log (message, type, payload, callback)
     {
         let body = {
-            xsrc : 'remo',
+            xsrc : 'snooze',
             environment:  process.env.ENVIRONMENT,
             severity : type,
         };
