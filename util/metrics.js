@@ -1,59 +1,18 @@
-'use strict';
-const request   = require('./request');
-const logger    = require('./logger');
+const Metrics = require('@bblabs/mindfulness').Metrics;
 
-class Metrics
-{
-    constructor ()
-    {
-        this.settings = {
-            host : process.env.METRICS_HOST
+const layers = [];
+
+if (process.env.METRICS_HOST) {
+    layers.push({
+        type: 'json_post',
+        host: process.env.METRICS_HOST,
+        paths: {
+            increment: '/microservice/$category/$metric/increment',
+            timing: '/microservice/$category/$metric/timing',
         }
-    }
-
-    increment (featureName, metric)
-    {
-        let path = `/feature/snooze.${featureName}/${metric}/increment`;
-        this.sendMetricsRequest(path)
-            .catch((err) => {
-                console.error('Failed to send metrics request', err);
-            })
-    }
-
-    timing (featureName, metric)
-    {
-        let path = `/feature/snooze.${featureName}/${metric}/timing`;
-        this.sendMetricsRequest(path)
-            .catch((err) => {
-                console.error('Failed to send metrics request', err);
-            })
-    }
-
-    sendMetricsRequest (path)
-    {
-        return new Promise((resolve, reject) => {
-            let options = {
-                host : this.settings.host,
-                path : path,
-                method : 'POST',
-                headers : {
-                    'Content-Type' : 'application/json'
-                }
-            };
-            let requestBody = {
-              environment : process.env.ENVIRONMENT,
-              xsrc : 'snooze'
-            };
-            request.send(options, [], JSON.stringify(requestBody))
-                .then((data) => {
-                    resolve(data);
-                })
-                .catch((err) => {
-                    reject(err);
-                })
-        });
-    }
-
+    });
 }
 
-module.exports = new Metrics();
+const metrics = new Metrics(layers);
+
+module.exports = metrics;
