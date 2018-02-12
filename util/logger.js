@@ -6,6 +6,7 @@ if (process.env.LOGGER_HOST) {
     layers.push({
         type: 'json_post',
         host: process.env.LOGGER_HOST,
+        dataDefaults: { xsrc: 'snooze' }
     });
 }
 
