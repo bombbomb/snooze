@@ -10,16 +10,6 @@ if (process.env.METRICS_HOST) {
         paths: {
             increment: '/microservice/$category/$metric/increment',
             timing: '/microservice/$category/$metric/timing',
-        },
-        before: (metricType, metric, options) => {
-            return new Promise((resolve, reject) => {
-                metric.metric = `snooze.${metric.metric}`;
-                resolve({
-                    metricType,
-                    metric,
-                    options
-                });
-            });
         }
     });
 }

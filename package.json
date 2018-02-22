@@ -17,7 +17,7 @@
   },
   "homepage": "https://github.com/bombbomb/snooze",
   "dependencies": {
-    "@bblabs/mindfulness": "^1.0.0",
+    "@bblabs/mindfulness": "^1.1.8",
     "aws-sdk": "^2.3.6",
     "bbjwt-client": "^0.5.7",
     "body-parser": "^1.15.0",
