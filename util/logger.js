@@ -1,27 +1,15 @@
-var elkLogger = require('node-elk-logger');
+const Logger = require('@bblabs/mindfulness').Logger;
 
-if (!process.env.ELK_LOGGER_HOST)
-{
-    elkLogger.log = function(message, type, payload){
-        if (type == 'ERROR')
-        {
-            console.error(type+': '+message, payload);
-        }
-        else
-        {
-            console.log(type+': '+message, payload);
-        }
-    };
-}
-else
-{
-    elkLogger.configure({
-        host: process.env.ELK_LOGGER_HOST,
-        elasticSearchIndexPrefix: 'snooze',
-        messageDecorations: { environment: process.env.ENVIRONMENT },
-        level: process.env.LOGGING_LEVEL,
-        logToConsole: (process.env.ENVIRONMENT != 'Production')
+const layers = ['console'];
+
+if (process.env.LOGGER_HOST) {
+    layers.push({
+        type: 'json_post',
+        host: process.env.LOGGER_HOST,
+        dataDefaults: { xsrc: 'snooze' }
     });
 }
 
-module.exports = elkLogger;
+const logger = new Logger(layers);
+
+module.exports = logger;

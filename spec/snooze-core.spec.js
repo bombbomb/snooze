@@ -43,16 +43,6 @@ var tasks = require('../core/tasks');
 
 // Stub Overrides
 
-var loggerStub        = require('../util/logger');
-loggerStub.log = function(message,type,payload) {
-    console.log(message);
-};
-loggerStub['@global'] = true;
-
-var sdcStub             = require('../util/metrics');
-sdcStub.incrMetric = function(metric){ console.log('ignored metric: '+metric); };
-sdcStub['@global'] = true;
-
 var dynaliteServer = dynalite({ path: './snooze-db' });
 dynaliteServer.listen(4567, function(err) {
     if (err) throw err;
@@ -67,7 +57,6 @@ var dynamoConfig = {
 };
 
 var appStubs = {
-    log: loggerStub,
     'aws-sdk': {
         SNS: function(){
             this.sendMessage = sinon.stub();
@@ -75,9 +64,6 @@ var appStubs = {
         },
         '@global': true
     },
-    '../util/logger': loggerStub,
-    './util/logger': loggerStub,
-    './metrics': sdcStub,
     Base64: {
         encode: null
     }
@@ -86,7 +72,7 @@ var appStubs = {
 function setupTestServerForRequests ()
 {
     var express      = require('express');
-    var bodyParser   = require("body-parser");
+    var bodyParser   = require('body-parser');
     var app = express();
 
     app.use(bodyParser.urlencoded({ extended: false, limit: '50mb' }));
