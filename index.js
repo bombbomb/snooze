@@ -21,14 +21,14 @@ var user            = require('./util/user');
 
 var sqsProcessorOptions = {
     tableName: process.env.ENVIRONMENT + '_SnoozeSQSWatcher',
-    logger: function(message,payload,type) {
+    logger: function(message,payload) {
         if (type)
         {
-            logger.log('sqsProcessor Message Error '+message,type.toUpperCase(),payload);
+            logger.logInfo('sqsProcessor Message Error '+message, payload);
         }
         else
         {
-            logger.log('sqsProcessor Message Error '+message, 'LOG', payload);
+            logger.logInfo('sqsProcessor Message Error '+message, payload);
         }
     },
     maxNumberOfMessages: process.env.MAX_SQS_MESSAGE,
