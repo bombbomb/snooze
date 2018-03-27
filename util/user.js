@@ -16,7 +16,7 @@ module.exports = {
                 var reqIP = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
                 if (err)
                 {
-                    sdc.increase('user', 'authenticate.fail');
+                    sdc.increment('user', 'authenticate.fail');
                     next(new Error('Invalid JWT from ' + reqIP));
                 }
                 else
