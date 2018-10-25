@@ -1,10 +1,6 @@
-FROM    ubuntu:latest
+FROM    ubuntu:xenial
 
-RUN apt-get -y update
-RUN apt-get -y dist-upgrade
-RUN apt-get -y install nodejs
-RUN apt-get -y install npm
-RUN apt-get -y install balance
+RUN apt-get -y update && apt-get -y dist-upgrade && apt-get -y install nodejs && apt-get -y install npm && apt-get -y install balance
 
 RUN npm install forever -g
 
