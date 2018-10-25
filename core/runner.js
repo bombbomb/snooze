@@ -8,12 +8,10 @@ var seekInterval = ((process.env.RUN_INTERVAL || 5) * 1000); // 5 second default
 
 function Runner()
 {
-
     var me = this;
     var runTimer = setInterval(function(){
         me.startTasksToRun();
     }, seekInterval);
-
 }
 
 Runner.prototype.startTasksToRun = function()
