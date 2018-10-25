@@ -467,14 +467,16 @@ sqsWatcher.start(function(err, queueData, event, onComplete){
                 var eventMapDetail = null;
                 if (typeof queueData.eventMap != 'undefined') 
                 {
-
                     var eventMapDetail = null;
                     var eventMapArray = queueData.eventMap;
+                    console.log('Event Map Array : ', eventMapArray);
                     for (var i = 0; i < eventMapArray.length; i++) {
                         var eventMap = eventMapArray[i];
-                        if (sqsMessage[eventMap.eventField] == eventMap.eventValue)
+                        console.log('EventMap : ', eventMap);
+                        if (sqsMessage[eventMap.eventField] === eventMap.eventValue)
                         {
                             eventMapDetail = eventMap;
+                            console.log('EventMapDetail : ', eventMapDetail)
                             break;
                         }
                     }
