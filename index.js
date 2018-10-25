@@ -465,6 +465,7 @@ sqsWatcher.start(function(err, queueData, event, onComplete){
             if (event.name.indexOf('ReminderCancellations') != -1)
             {
                 var eventMapDetail = null;
+                console.log('QueueData : ', queueData);
                 if (typeof queueData.eventMap != 'undefined') 
                 {
                     var eventMapDetail = null;
