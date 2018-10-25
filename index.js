@@ -465,17 +465,20 @@ sqsWatcher.start(function(err, queueData, event, onComplete){
             if (event.name.indexOf('ReminderCancellations') != -1)
             {
                 var eventMapDetail = null;
-
-                if (typeof queueData.eventMap != 'undefined') {
+                if (typeof queueData.eventMap != 'undefined') 
+                {
 
                     var eventMapDetail = null;
-                    queueData.eventMap.forEach(function(eventMap) {
+                    var eventMapArray = queueData.eventMap;
+                    for (var i = 0; i < eventMapArray.length; i++) {
+                        var eventMap = eventMapArray[i];
                         if (sqsMessage[eventMap.eventField] == eventMap.eventValue)
                         {
                             eventMapDetail = eventMap;
-                            return;
+                            break;
                         }
-                    });
+                    }
+                }
  
 
                 if (eventMapDetail !== null)
