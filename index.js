@@ -462,13 +462,17 @@ sqsWatcher.start(function(err, queueData, event, onComplete){
             var sqsMessage = JSON.parse(sqsBody.Message);
             var eventType = '';
 
+
             if (event.name.indexOf('ReminderCancellations') != -1)
             {
                 var eventMapDetail = null;
                 console.log('queueData : ', queueData);
+                console.log('queueData.eventMap : ', queueData.eventMap);
+
                 if (typeof queueData.eventMap != 'undefined') {
                     for (var map in queueData.eventMap)
                     {
+                        console.log('map in queueData : ', map);
                         if (!queueData.eventMap.hasOwnProperty(map)) continue;
                         eventMapDetail = queueData.eventMap[map];
                         eventType = sqsMessage[eventMapDetail.eventField];
