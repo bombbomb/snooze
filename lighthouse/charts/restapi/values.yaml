@@ -1,0 +1,64 @@
+role:
+  prefix: arn:aws:iam::286551237558:role/
+deployment:
+  replicas: 5
+  podPort: 80
+  readiness:
+    enabled: true
+    probe:
+      httpGet:
+        port: 80
+        path: '/health-check'
+        scheme: HTTP
+  resources:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 384Mi
+hpa:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 20
+  cpu:
+    enabled: true
+    averageUtilization: 80
+  memory:
+    enabled: true
+    averageUtilization: 80
+ingress:
+  enabled: true
+  class: nginx-proxy
+# Keep canary in sync with above
+canary:
+  deployment:
+    replicas: 5
+    podPort: 80
+    readiness:
+      enabled: true
+      probe:
+        httpGet:
+          port: 80
+          path: '/health-check'
+          scheme: HTTP
+    resources:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 384Mi
+  hpa:
+    enabled: true
+    minReplicas: 5
+    maxReplicas: 20
+    cpu:
+      enabled: true
+      averageUtilization: 80
+    memory:
+      enabled: true
+      averageUtilization: 80
+  ingress:
+    enabled: true
+    class: nginx-proxy
