@@ -1,0 +1,105 @@
+@Library("LighthouseStatusReporter") _
+
+import com.bombbomb.*
+
+def sr = new StatusReporter(this)
+def customImage
+def imageTag
+
+// build this
+pipeline {
+    agent {
+        label 'docker'
+    }
+
+    stages {
+        stage('Building Container Images') {
+            steps {
+                timeout(20) {
+                    script {
+                        sr.notifyStageStart(sr.STATUS_BUILDING)
+                        // build the docker images tag
+                        def name = env.JOB_NAME.trim().split("/")[1]
+                        name = name.toLowerCase()
+                        def commitShort = env.GIT_COMMIT.take(9)
+                        imageTag = "${env.REGISTRY_URL}/${name}:${commitShort}"
+
+                        // run the build script defined by the calling script
+                        withEnv(["IMAGE_TAG=${imageTag}", "OUTPUT_DIR=/usr/src/outputs"]) {
+                            script {
+                                sh "echo running build"
+                                // dockerBuild() // pass docker build arguments you might need as a string
+                                // for example: dockerBuild("--build-arg NPM_TOKEN=${NPM_TOKEN} --force-rm --pull")
+                                sh "docker build -t ${env.IMAGE_TAG} ."
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Running Unit Tests') {
+            steps {
+                timeout(20) {
+                    script {
+                        sr.notifyStageStart(sr.STATUS_BUILDING)
+                        sh "mkdir -p artifacts"
+
+                        // run the tests defined by the calling script
+                        withEnv(["IMAGE_TAG=${imageTag}-test", "OUTPUT_DIR=/usr/src/outputs"]) {
+                            script {
+                                // this script must result in the creation of a 'test-results.xml' file in the /usr/src/outputs directory
+                                // of the Docker image
+                                sh "echo running test script"
+                                sh "docker build -t ${env.IMAGE_TAG} ."
+                            }
+                        }
+                    }
+                }
+            }
+            post {
+                always {
+                    // publish the test results and remove the results file
+                    // junit "artifacts/test-results*.xml"
+                    // archiveArtifacts "artifacts/*"
+                    sh "echo Skipping coverage part of the process"
+                }
+            }
+        }
+
+        stage('Sending to Container Registry') {
+            steps {
+                timeout(5) {
+                    script {
+                        sr.notifyStageStart(sr.STATUS_BUILDING)
+                        // publish the docker image
+                        sh "docker push ${imageTag}"
+                    }
+                }
+            }
+        }
+
+        stage('Saving Build Details') {
+            steps {
+                script {
+                    sr.notifyStageStart(sr.STATUS_BUILDING)
+                    sr.gatherLog()
+                    sr.finished = true
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            script {
+                // clean up the docker image
+                sh "docker rmi -f ${imageTag} || true"
+                // clean up the Jenkins workspace
+                cleanWs()
+                // notify Lighthouse of build finish
+                sr.notifyFinish()
+            }
+        }
+    }
+}

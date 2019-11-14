@@ -1,0 +1,3 @@
+@Library("LighthouseStatusReporter") _
+
+delete()
