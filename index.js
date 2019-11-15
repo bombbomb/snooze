@@ -438,20 +438,20 @@ function runnerStarted()
     console.log('Task Runner Started');
 }
 
-// var child = new(forever.Forever)('core/runner.js', {
-//     max: 3,
-//     silent: true,
-//     args: []
-// });
+var child = new(forever.Forever)('core/runner.js', {
+    max: 3,
+    silent: true,
+    args: []
+});
 
-// child.on('start', runnerStarted);
-// child.on('exit', runnerExited);
-// child.start();
+child.on('start', runnerStarted);
+child.on('exit', runnerExited);
+child.start();
 
-for (var i = 0; i < 3; i++) {
-    console.log('starting runner...');
-    var f = require('core/runner.js');
-}
+// for (var i = 0; i < 3; i++) {
+//     console.log('starting runner...');
+//     var f = require('core/runner.js');
+// }
 
 sqsWatcher.start(function(err, queueData, event, onComplete){
 
