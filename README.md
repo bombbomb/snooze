@@ -15,3 +15,4 @@ deploy to AWS with `grunt lambda_deploy`
 SNS - Publish to taskArn
 Dynamo - Describe table, PutItem, UpdateItem, GetItem, Query on ENVIRONMENT_SnoozeSnsTaskTargetMap,
 ENVIRONMENT_SnoozeTasks
+SQS - Sasquatcha hits queue at ENVIRONMENT_SnoozeSQSWatcher
