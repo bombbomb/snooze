@@ -5,6 +5,7 @@ var guid = require('guid');
 var https = require('https');
 
 var ddbTableName = process.env.ENVIRONMENT + '_SnoozeTasks';
+console.log('Tasks table name: ' + ddbTableName);
 
 function Tasks(logInstance)
 {
