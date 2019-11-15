@@ -358,7 +358,7 @@ app.get('/tasks/:clientid/status/:taskstatus', function(req, res, next) {
 
 app.get('/health-check', function(req, res, next) {
 
-    if(child)
+    if(typeof child !== 'undefined' && child)
     {
         returnSuccessJson(res, {message : 'Snooze is happy, Runner is up'});
     }
