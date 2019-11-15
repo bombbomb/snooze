@@ -1,0 +1,9 @@
+deployment:
+  replicas: 2
+hpa:
+  minReplicas: 2
+canary:
+  deployment:
+    replicas: 2
+  hpa:
+    minReplicas: 2

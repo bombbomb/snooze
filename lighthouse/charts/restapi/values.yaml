@@ -1,7 +1,7 @@
 role:
   prefix: arn:aws:iam::286551237558:role/
 deployment:
-  replicas: 5
+  replicas: 4
   podPort: 80
   readiness:
     enabled: true
@@ -19,7 +19,7 @@ deployment:
       memory: 384Mi
 hpa:
   enabled: true
-  minReplicas: 3
+  minReplicas: 4
   maxReplicas: 20
   cpu:
     enabled: true
@@ -33,7 +33,7 @@ ingress:
 # Keep canary in sync with above
 canary:
   deployment:
-    replicas: 5
+    replicas: 4
     podPort: 80
     readiness:
       enabled: true
@@ -51,7 +51,7 @@ canary:
       memory: 384Mi
   hpa:
     enabled: true
-    minReplicas: 5
+    minReplicas: 4
     maxReplicas: 20
     cpu:
       enabled: true
