@@ -32,7 +32,7 @@ Snooze uses a queue called `Snooze_master_ReminderCancellations` that occasional
 
 #### Failure Mode - Queue Processor Stopped
 
-RESOLUTION: Kill the EC2 instances that are running snooze. Don't kill all at once.
+**RESOLUTION**: Kill the EC2 instances that are running snooze. Don't kill all at once.
 
 ##### Evidence
 
