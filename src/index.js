@@ -10,8 +10,11 @@ var bbJWT           = require("bbjwt-client");
 var AWS             = require('aws-sdk');
 var crypto          = require('crypto');
 
-const { logger }    = require('@bblabs/knapsack');
-var sdc             = require('./util/metrics');
+const {
+    configurePipelineMetricSender,
+    incrementPipelineSubMetric,
+    logger
+} = require('@bblabs/knapsack');
 
 var snsMap          = require('./core/snsMap');
 var tasks           = require('./core/tasks');
@@ -48,6 +51,10 @@ process.on('uncaughtException',function(err){
     //process.exit(1);
 });
 
+configurePipelineMetricSender({
+    appName: 'snooze',
+    enableBuffer: false
+});
 
 app.listen(process.env.IP_ADDRESS || 80);
 
@@ -139,12 +146,12 @@ app.post('/add', function (req, res, next) {
                     if (err)
                     {
                         logger.error('Error occurred adding a task', { error: err, task });
-                        sdc.increment('addTask', 'fail');
+                        incrementPipelineSubMetric('addTask', 'fail');
                         returnErrorJson(res, err);
                     }
                     else
                     {
-                        sdc.increment('addTask', 'success');
+                        incrementPipelineSubMetric('addTask', 'success');
                         returnSuccessJson(res, { id: taskId, success: true, message: 'Task added' });
                     }
 
