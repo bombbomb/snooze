@@ -17,38 +17,14 @@
   },
   "homepage": "https://github.com/bombbomb/snooze",
   "dependencies": {
-    "@bblabs/mindfulness": "~1.3",
-    "aws-sdk": "^2.3.6",
-    "bbjwt-client": "^0.5.7",
-    "body-parser": "^1.15.0",
-    "cookie-parser": "^1.4.1",
+    "@bblabs/knapsack": "^0.1.8",
+    "aws-sdk": "^2.642.0",
+    "bbjwt-client": "^0.6.0",
+    "body-parser": "^1.19.0",
+    "cookie-parser": "^1.4.5",
     "dynamodb-doc": "^1.0.0",
-    "express": "^4.13.4",
-    "forever": "^0.15.1",
-    "guid": "0.0.12",
-    "https": "^1.0.0",
-    "jsonwebtoken": "^5.7.0",
-    "node-elk-logger": "^0.1.7",
-    "request": "^2.79.0",
-    "sasquatcha": "^0.1.1",
-    "statsd-client": "^0.2.1",
-    "underscore": "^1.8.3"
+    "express": "^4.17.1",
+    "request": "^2.88.2"
   },
-  "devDependencies": {
-    "chai": "^3.4.1",
-    "dynalite": "^0.17.3",
-    "grunt": "^0.4.5",
-    "grunt-aws-lambda": "^0.11.0",
-    "grunt-karma": "^0.12.1",
-    "grunt-mocha-istanbul": "^3.0.1",
-    "grunt-mocha-test": "^0.12.7",
-    "istanbul": "^0.4.2",
-    "karma": "^0.13.22",
-    "leveldown": "^1.4.4",
-    "mocha": "^2.4.5",
-    "mocha-istanbul": "^0.2.0",
-    "proxyquire": "^1.7.4",
-    "sinon": "^1.17.3",
-    "supertest": "^1.2.0"
-  }
+  "devDependencies": {}
 }

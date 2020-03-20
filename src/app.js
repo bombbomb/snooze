@@ -236,13 +236,7 @@ app.get('/tasks/:clientid/status/:taskstatus', function(req, res, next) {
 });
 
 app.get('/health-check', function(req, res, next) {
-    // TODO kopp
-    if(typeof child !== 'undefined' && child) {
-        returnSuccessJson(res, {message : 'Snooze is happy, Runner is up'});
-    } else {
-        returnErrorJson(res, 'Snooze is sad, Runner is down right now');
-    }
-
+    returnSuccessJson(res, {message : 'Snooze is happy'});
 });
 
 app.get('/status-codes', function(req, res, next) {

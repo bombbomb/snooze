@@ -1,7 +1,6 @@
 var AWS = require('aws-sdk');
 var doc = require('dynamodb-doc');
 var _ = require('underscore');
-var guid = require('guid');
 
 var ddbTableName = process.env.ENVIRONMENT + '_SnoozeSnsTaskTargetMap';
 
