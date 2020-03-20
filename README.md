@@ -17,8 +17,7 @@ queues from SQS.
 
 Quick Links:
 
-Activate DockerMachine role using
-[this link](https://signin.aws.amazon.com/switchrole?roleName=Developer_ReadOnly&account=bb-docker-machine&displayName=DeveloperReadOnly@DockerMachine).
+Login to the [DockerMachine Admin Role](https://signin.aws.amazon.com/switchrole?roleName=Admin&account=bb-docker-machine&displayName=Admin@DockerMachine).
 
 [ECS cluster](https://console.aws.amazon.com/ecs/home?region=us-east-1#/clusters/master-snooze-master/services)
 
@@ -32,7 +31,7 @@ Snooze uses a queue called `Snooze_master_ReminderCancellations` that occasional
 
 #### Failure Mode - Queue Processor Stopped
 
-**RESOLUTION**: Kill the EC2 instances that are running snooze. Don't kill all at once.
+**RESOLUTION**: Terminate the EC2 instances that are running snooze. Don't kill all at once.
 
 ##### Evidence
 
