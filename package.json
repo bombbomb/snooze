@@ -4,7 +4,7 @@
   "description": "it does stuff later",
   "main": "snooze.lambda.js",
   "scripts": {
-    "test": "grunt mocha_istanbul"
+    "test": "mocha spec/*.spec.js"
   },
   "repository": {
     "type": "git",
@@ -24,7 +24,16 @@
     "cookie-parser": "^1.4.5",
     "dynamodb-doc": "^1.0.0",
     "express": "^4.17.1",
-    "request": "^2.88.2"
+    "guid": "0.0.12",
+    "request": "^2.88.2",
+    "sasquatcha": "^0.1.5",
+    "underscore": "^1.9.2"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "dynalite": "^3.1.5",
+    "mocha": "^7.1.1",
+    "proxyquire": "^2.1.3",
+    "sinon": "^9.0.1",
+    "supertest": "^4.0.2"
+  }
 }

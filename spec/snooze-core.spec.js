@@ -39,7 +39,7 @@ var deleteFolderRecursive = function(path) {
 deleteFolderRecursive('./snooze-db');
 
 var token = jwt.sign({ foo: 'bar', expires: (Date.now()/1000) + (60 * 60 * 24), clientId : 'THISISACLIENTID' }, process.env.JWT_SECRET);
-var tasks = require('../core/tasks');
+var tasks = require('../src/core/tasks');
 
 // Stub Overrides
 
@@ -97,7 +97,7 @@ describe('Snooze Test Suite', function() {
         setTimeout(done, 1900);
     });
 
-    var snooze = proxyquire('../index', appStubs);
+    var snooze = proxyquire('../src/index', appStubs);
     var snoozeRunner = snooze.runner;
     snooze = snooze.app;
 
