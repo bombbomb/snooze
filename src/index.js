@@ -10,7 +10,7 @@ var bbJWT           = require("bbjwt-client");
 var AWS             = require('aws-sdk');
 var crypto          = require('crypto');
 
-var logger          = require('./util/logger');
+const { logger }    = require('@bblabs/knapsack');
 var sdc             = require('./util/metrics');
 
 var snsMap          = require('./core/snsMap');
@@ -22,7 +22,7 @@ var user            = require('./util/user');
 var sqsProcessorOptions = {
     tableName: process.env.ENVIRONMENT + '_SnoozeSQSWatcher',
     logger: function(message,payload) {
-        logger.logInfo('sqsProcessor Message Error ' + message, payload);
+        logger.info('sqsProcessor Message Error', { sqsMessage: message, payload });
     },
     maxNumberOfMessages: process.env.MAX_SQS_MESSAGE,
     concurrency: process.env.SQS_WATCHERS,
@@ -38,7 +38,7 @@ process.on('uncaughtException',function(err){
     {
         if (err.message.indexOf('ECONNRESET') == -1)
         {
-            logger.logError('[INDEX] uncaughtException: ' + err.message);
+            logger.error('[INDEX] uncaughtException', { error: err, errorMessage: err.message });
         }
     }
     catch (e)
@@ -138,7 +138,7 @@ app.post('/add', function (req, res, next) {
                 tasks.addTask(task,function(err,taskId){
                     if (err)
                     {
-                        logger.logError('Error occurred adding a task: '+err,task);
+                        logger.error('Error occurred adding a task', { error: err, task });
                         sdc.increment('addTask', 'fail');
                         returnErrorJson(res, err);
                     }
@@ -177,12 +177,12 @@ app.post('/add', function (req, res, next) {
                         snsMap.getTarget(task.snsTask,function(err,taskInfo){
                             if (err)
                             {
-                                logger.logError('Failed to retrieve snsTask Target for '+task.snsTask,err);
+                                logger.error('Failed to retrieve snsTask Target', { task: task.snsTask, error: err });
                                 returnError(res, 'Failed to retrieve snsTask Target for '+task.snsTask);
                             }
                             else if (typeof taskInfo == 'undefined' || !taskInfo.snsTarget)
                             {
-                                logger.logError('No snsTask Target exists for '+task.snsTask,err);
+                                logger.error('No snsTask Target exists for task', { task: task.snsTask })
                                 returnError(res, 'No snsTask Target exists for '+task.snsTask);
                             }
                             else
@@ -200,7 +200,7 @@ app.post('/add', function (req, res, next) {
                 }
                 catch (e)
                 {
-                    logger.logError('Exception occurred adding task ',e);
+                    logger.error('Exception occurred adding task', { error: e });
                     returnError(res, 'Add Task Failed; '+e.message);
                 }
 
@@ -431,7 +431,7 @@ function returnSuccessJson(res,result)
 
 function runnerExited()
 {
-    logger.logError('WARNING: Snooze main runner exited! Was this expected?');
+    logger.error('WARNING: Snooze main runner exited! Was this expected?');
 }
 function runnerStarted()
 {
@@ -505,7 +505,7 @@ sqsWatcher.start(function(err, queueData, event, onComplete){
                     if (typeof reminderTaskId != 'undefined' && reminderTaskId.length)
                     {
                         reminderTaskId = 'rem'+reminderTaskId;
-                        logger.logInfo('Fetching Reminder Task by RefId to Cancel '+reminderTaskId);
+                        logger.info('Fetching Reminder Task by RefId to Cancel', { reminderTaskId });
                         tasks.getTaskByRef(reminderTaskId,function(err,task){
                             if (!err && task.Count > 0)
                             {
@@ -513,24 +513,30 @@ sqsWatcher.start(function(err, queueData, event, onComplete){
                                 if (taskDetail)
                                 {
                                     tasks.setStatus(taskDetail.id, tasks.SUCCESS, function(err, data){
-                                        err && logger.logError('Failed to cancel Reminder for Opened Email: '+taskDetail.id,taskDetail);
-                                        !err && logger.logInfo('Canceled Reminder for Opened Email: '+taskDetail.id,taskDetail);
+                                        if (err) {
+                                            logger.error('Failed to cancel Reminder for Opened Email', {
+                                                id: taskDetail.id,
+                                                taskDetail
+                                            });
+                                        } else {
+                                            logger.info('Canceled Reminder for Opened Email', { id: taskDetail.id, taskDetail });
+                                        }
                                         onComplete(err,null);
                                     });
                                     return;
                                 }
-                                logger.logInfo('Fetching Reminder Task by RefId to Cancel '+reminderTaskId,taskDetail);
+                                logger.info('Fetching Reminder Task by RefId to Cancel', { reminderTaskId, taskDetail });
                                 onComplete('No Task detail, unable to update status for '+ reminderTaskId, null);
                             }
                             else
                             {
                                 if (err)
                                 {
-                                    logger.logError('sqsProcessor failed to fetch task '+reminderTaskId+': '+err);
+                                    logger.error('sqsProcessor failed to fetch task', { reminderTaskId, error: err });
                                 }
                                 else
                                 {
-                                    logger.logInfo('No task to update for '+reminderTaskId);
+                                    logger.info('No task to update', { reminderTaskId });
                                     err = null;
                                 }
                                 onComplete(err, null);
@@ -539,14 +545,14 @@ sqsWatcher.start(function(err, queueData, event, onComplete){
                     }
                     else
                     {
-                        logger.logError('Unable to find RefId for message, type '+eventType, sqsMessage);
+                        logger.error('Unable to find RefId for message, type', { eventType, sqsMessage });
                         onComplete(null, null);
                     }
 
                 }
                 else
                 {
-                    logger.logInfo('Unable to find event map for event', sqsMessage);
+                    logger.info('Unable to find event map for event', { sqsMessage });
                     onComplete('Unable to find event map for event', null);
                 }
 
@@ -559,7 +565,7 @@ sqsWatcher.start(function(err, queueData, event, onComplete){
     }
     catch (e)
     {
-        logger.logError('SQSWatcher Exception: ' + e.message, e.stack);
+        logger.error('SQSWatcher Exception', { errorMessage: e.message, errorStack: e.stack });
         onComplete(e.message, null);
     }
 
@@ -570,4 +576,4 @@ if (process.env.TEST_RUNNER)
     module.exports = { app: app, runner: child };
 }
 
-logger.logWarning('Snooze Started Successfully!');
+logger.info('Snooze Started Successfully!');
