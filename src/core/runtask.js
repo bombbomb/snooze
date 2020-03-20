@@ -1,10 +1,10 @@
 var https       = require('https');
 var request     = require('request');
 var AWS         = require('aws-sdk');
+const { logger } = require('@bblabs/knapsack');
 
 try
 {
-    var logger      = require('./../util/logger');
     var tasks       = require('./tasks');
 
     var snsParameters = { region: process.env.AWS_REGION };
@@ -18,21 +18,19 @@ try
 }
 catch (e)
 {
-    logger.logError('[CHILD] Failed on Inital Setup : '+e);
-    console.error('[CHILD] Failed on Inital Setup: '+e);
+    logger.error('[CHILD] failed on initial setup', { error: e });
     process.send({ result: '[CHILD] Failed on Inital Setup '+e });
 }
 
 process.on('uncaughtException', function(err) {
-    logger.logError('[CHILD] uncaughtException: '+err.message);
-    console.error('[CHILD] uncaughtException: '+err);
+    logger.error('[CHILD] uncaughtException', { error: err });
     process.send({ result: '[CHILD] uncaughtException: '+err.message });
     process.exit(tasks.ERROR);
 });
 
 process.on('message', function(task){
 
-    logger.logInfo('[CHILD] received a message', task);
+    logger.info('[CHILD] received a message', { task });
 
     try {
 
@@ -51,7 +49,7 @@ process.on('message', function(task){
                     var jsonData = JSON.parse(jsonString);
                     options.json = jsonData;
                 } catch (e) {
-                    logger.logError('[CHILD] HTTP Request Error: '+e);
+                    logger.error('[CHILD] http request error', { error: e });
                     return false;
                 }
                 return true;
@@ -62,7 +60,7 @@ process.on('message', function(task){
                 request(options, function(e, res, body) {
                     if (e)
                     {
-                        logger.logError('[CHILD] HTTP Request Error: '+e);
+                        logger.error('[CHILD] http request error', { error: e });
                         process.send({ result: '[CHILD] HTTP Request Error'+e });
                         process.exit(tasks.ERROR);
                     }
@@ -97,11 +95,9 @@ process.on('message', function(task){
             });
             httpRequest.end();
             httpRequest.on('error', function(e) {
-
-                logger.logError('[CHILD] HTTP Request Error: '+e);
+                logger.error('[CHILD] http requset error', { error: e });
                 process.send({ result: '[CHILD] HTTP Request Error'+e });
                 process.exit(tasks.ERROR);
-
             });
 
         }
@@ -115,7 +111,7 @@ process.on('message', function(task){
             sns.publish(parameters,function(err, data){
                 if (err)
                 {
-                    logger.logError('[CHILD] Error while trying to publish SNS Message... '+err);
+                    logger.error('[CHILD] error while trying to publish SNS message', { error: err });
                     process.send({ result: 'Error while trying to publish SNS Message... '+err });
                     process.exit(tasks.ERROR);
                 }
@@ -135,7 +131,7 @@ process.on('message', function(task){
     }
     catch (e)
     {
-        logger.logError('[CHILD] Exception occurred '+e);
+        logger.error('[CHILD] exception occurred', { error: e });
         process.send({ result: 'Exception occurred in child '+e });
         process.exit(tasks.ERROR);
     }

@@ -1,5 +1,5 @@
 var bbJwt       = require('bbjwt-client');
-var sdc         = require('./metrics');
+const { incrementPipelineSubMetric } = require('@bblabs/knapsack');
 
 module.exports = {
 
@@ -16,7 +16,7 @@ module.exports = {
                 var reqIP = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
                 if (err)
                 {
-                    sdc.increment('user', 'authenticate.fail');
+                    incrementPipelineSubMetric('user', 'authenticate.fail');
                     next(new Error('Invalid JWT from ' + reqIP));
                 }
                 else
