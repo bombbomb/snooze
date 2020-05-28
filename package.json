@@ -4,7 +4,8 @@
   "description": "it does stuff later",
   "main": "snooze.lambda.js",
   "scripts": {
-    "test": "grunt mocha_istanbul"
+    "test": "grunt mocha_istanbul",
+    "start:forever": "forever index.js"
   },
   "repository": {
     "type": "git",
